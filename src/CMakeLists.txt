@@ -3,7 +3,6 @@ file(GLOB_RECURSE ALGO_SOURCES CONFIGURE_DEPENDS
     sorting/*.cpp
     divideAndConquer/*.cpp
 )
-add_library(sut STATIC ${ALGO_SOURCES})
 
 file(GLOB_RECURSE ALGO_HEADERS CONFIGURE_DEPENDS
     graph/*.h
@@ -11,8 +10,23 @@ file(GLOB_RECURSE ALGO_HEADERS CONFIGURE_DEPENDS
     divideAndConquer/*.h
 )
 
+# Combine all source files
+set(ALL_ALGO_FILES ${ALGO_SOURCES} ${ALGO_HEADERS})
+
+# Generate Visual Studio filters based on folder structure
+foreach(_file IN LISTS ALL_ALGO_FILES)
+    get_filename_component(_dir "${_file}" PATH)
+    file(RELATIVE_PATH _group "${CMAKE_SOURCE_DIR}" "${_dir}")
+    string(REPLACE "/" "\\" _group "${_group}")
+    source_group("${_group}" FILES "${_file}")
+endforeach()
+
+
+add_library(sut STATIC ${ALGO_SOURCES})
+
 target_sources(sut PRIVATE ${ALGO_HEADERS})
 
+# compiler has rules on include lookup but we need to extend it to use our target paths
 target_include_directories(sut PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 
 add_executable(main main.cpp)

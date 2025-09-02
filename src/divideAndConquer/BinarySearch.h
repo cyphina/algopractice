@@ -5,7 +5,7 @@
 template <typename T>
 concept Arithmetic = std::is_arithmetic_v<T>;
 
-namespace BinarySearch
+namespace DivideAndConquer
 {
    template <typename T>
       requires Arithmetic<T>

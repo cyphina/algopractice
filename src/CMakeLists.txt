@@ -2,12 +2,14 @@ file(GLOB_RECURSE ALGO_SOURCES CONFIGURE_DEPENDS
     graph/*.cpp
     sorting/*.cpp
     divideAndConquer/*.cpp
+    core/*.cpp
 )
 
 file(GLOB_RECURSE ALGO_HEADERS CONFIGURE_DEPENDS
     graph/*.h
     sorting/*.h
     divideAndConquer/*.h
+    core/*.h
 )
 
 # Combine all source files

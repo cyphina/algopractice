@@ -1,5 +1,5 @@
 #include <catch2/catch_test_macros.hpp>
-#include "DivideAndConquer/DivideAndConquer.h"
+#include "divideAndConquer/MaximumSubarray.h"
 
 TEST_CASE("Find Maximum Subarray Recursive", "[divideAndConquer]")
 {

@@ -3,9 +3,11 @@ FetchContent_Declare(Catch2 GIT_REPOSITORY https://github.com/catchorg/Catch2.gi
 FetchContent_MakeAvailable(Catch2)
 
 file(GLOB_RECURSE ALGO_SOURCES CONFIGURE_DEPENDS
+    cppFeatures/*.cpp
+    divideAndConquer/*.cpp
     graph/*.cpp
     sorting/*.cpp
-    divideAndConquer/*.cpp
+    core/*.cpp
 )
 
 # Generate Visual Studio filters based on folder structure

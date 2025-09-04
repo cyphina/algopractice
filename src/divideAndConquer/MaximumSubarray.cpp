@@ -1,4 +1,4 @@
-#include "DivideAndConquer.h"
+#include "MaximumSubarray.h"
 
 namespace DivideAndConquer
 {
@@ -110,9 +110,9 @@ namespace DivideAndConquer
 
          if(currentSum > bestResult.max)
          {
-            bestResult.low = curentResult.low;
+            bestResult.low  = curentResult.low;
             bestResult.high = i;
-            bestResult.max = currentSum;
+            bestResult.max  = currentSum;
          }
       }
 

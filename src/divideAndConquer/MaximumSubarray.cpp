@@ -1,4 +1,5 @@
 #include "MaximumSubarray.h"
+#include <limits>
 
 namespace DivideAndConquer
 {

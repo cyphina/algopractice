@@ -31,7 +31,8 @@ namespace Core
       template <int C2>
       Matrix<T, RowSize, C2> MultiplyMatrix(const Matrix<T, ColumnSize, C2>& A) const;
 
-      T& operator[](std::size_t x) const { return m[x]; }
+      const T& operator[](std::size_t X, std::size_t Y) const;
+      T&       operator[](std::size_t X, std::size_t Y);
 
       std::array<T, RowSize * ColumnSize> m{};
    };
@@ -58,6 +59,23 @@ namespace Core
       return m[Index];
    }
 
+   template <typename T, std::size_t RowSize, std::size_t ColumnSize>
+   const T& Matrix<T, RowSize, ColumnSize>::operator[](std::size_t X, std::size_t Y) const
+   {
+      const size_t Index = Y + X * ColumnSize;
+      if(Index >= m.size())
+      {
+         throw std::out_of_range("Matrix index out of range");
+      }
+      return m[Index];
+   }
+
+   template <typename T, std::size_t RowSize, std::size_t ColumnSize>
+   T& Matrix<T, RowSize, ColumnSize>::operator[](std::size_t X, std::size_t Y)
+   {
+      return const_cast<T&>(std::as_const(*this)[X, Y]);
+   }
+
    template <typename T, std::size_t R, std::size_t C>
    template <int C2>
    Matrix<T, R, C2> Matrix<T, R, C>::MultiplyMatrix(const Matrix<T, C, C2>& A) const
@@ -71,9 +89,9 @@ namespace Core
             T Sum{};
             for(int k = 0; k < C; ++k)
             {
-               Sum += this->At(i, k) * A.At(k, j);
+               Sum += (*this)[i, k] * A[k, j];
             }
-            Result.At(i, j) = Sum;
+            Result[i, j] = Sum;
          }
       }
 

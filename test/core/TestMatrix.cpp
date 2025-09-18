@@ -9,9 +9,9 @@ TEST_CASE("Matrix At", "[matrix]")
    std::ranges::copy(Range, A.begin());
    const Core::Matrix<int, 4, 4> Mat1{A};
 
-   REQUIRE(Mat1.At(0, 0) == 1);
+   REQUIRE(Mat1[0, 0] == 1);
    REQUIRE_THROWS_AS(Mat1.At(4, 4), std::out_of_range);
-   REQUIRE(Mat1.At(3, 3) == 16);
+   REQUIRE(Mat1[3, 3] == 16);
 }
 
 TEST_CASE("Matrix Multiplication", "[matrix]")
@@ -20,6 +20,6 @@ TEST_CASE("Matrix Multiplication", "[matrix]")
    const Core::Matrix<int, 3, 3> Mat2{1, 2, 3, 1, 2, 3, 1, 2, 3};
    const auto                    Mat3 = Mat1.MultiplyMatrix(Mat2);
 
-   REQUIRE(Mat3.At(0, 0) == 6);
-   REQUIRE(Mat3.At(2, 2) == 18);
+   REQUIRE(Mat3[0, 0] == 6);
+   REQUIRE(Mat3[2, 2] == 18);
 }

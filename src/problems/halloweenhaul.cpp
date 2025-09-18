@@ -15,18 +15,14 @@ void InorderTraversalStack(const NodeType& RootNode)
 
    while(!S.empty() || CurrentNode)
    {
-      if(CurrentNode == S.top())
+      while(CurrentNode)
       {
-         S.pop();
+         S.push(CurrentNode);
+         CurrentNode = CurrentNode->left;
       }
-      else
-      {
-         while(CurrentNode && CurrentNode->left)
-         {
-            S.push(CurrentNode);
-            CurrentNode = CurrentNode->left;
-         }
-      }
+
+      CurrentNode = S.top();
+      S.pop();
 
       std::visit(
           [](auto&& arg)
@@ -42,18 +38,7 @@ void InorderTraversalStack(const NodeType& RootNode)
           },
           CurrentNode->data);
 
-      if(CurrentNode->right)
-      {
-         CurrentNode = CurrentNode->right;
-      }
-      else if(!S.empty())
-      {
-         CurrentNode = S.top();
-      }
-      else
-      {
-         CurrentNode = nullptr;
-      }
+      CurrentNode = CurrentNode->right;
    }
 }
 

@@ -22,7 +22,6 @@ namespace BinaryTree
 
     public:
       void            AddNode(std::unique_ptr<Node<T>>&& Node);
-      void            FindValue(T Value);
       const NodeList& GetNodes() const { return nodes; }
 
     private:

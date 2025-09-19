@@ -1,12 +1,24 @@
+#include <iostream>
+#include <locale>
 #include <print>
 #include <stack>
+#include <string>
 #include <variant>
 #include "tree/BinaryTree.h"
 
 namespace
 {
-   using NodeType = BinaryTree::Node<std::variant<std::monostate, int>>;
+   using NodeValueType = std::variant<std::monostate, int>;
+   using NodeType      = BinaryTree::Node<NodeValueType>;
+
 }
+
+struct NodePrinter
+{
+   void operator()(int value) const { std::print("Node: {}", value); }
+
+   void operator()(const auto& other) const { std::print("Node: [non-int type]"); }
+};
 
 void InorderTraversalStack(const NodeType& RootNode)
 {
@@ -24,21 +36,170 @@ void InorderTraversalStack(const NodeType& RootNode)
       CurrentNode = S.top();
       S.pop();
 
-      std::visit(
-          [](auto&& arg)
-          {
-             using T = std::decay_t<decltype(arg)>;
-             if constexpr(std::is_same_v<T, int>)
-             {
-                std::println("Node: {}", arg);
-             }
-             else
-             {
-             }
-          },
-          CurrentNode->data);
+      std::visit(NodePrinter{}, CurrentNode->data);
+      std::cout << "\n";
 
       CurrentNode = CurrentNode->right;
+   }
+}
+
+int ChildOnlyTraversal(const NodeType* Node)
+{
+   if(Node)
+   {
+      if(!Node->left && !Node->right)
+      {
+         return 1;
+      }
+      return 1 + ChildOnlyTraversal(Node->left) + ChildOnlyTraversal(Node->right);
+   }
+   return 0;
+}
+
+int LeafOnlyTraversal(const NodeType* Node)
+{
+   if(Node)
+   {
+      if(!Node->left && !Node->right)
+      {
+         return 1;
+      }
+      else
+      {
+         return LeafOnlyTraversal(Node->left) + LeafOnlyTraversal(Node->right);
+      }
+   }
+   return 0;
+}
+
+int CalculateHeight(const NodeType* Node)
+{
+   if(Node)
+   {
+      if(!Node->left && !Node->right)
+      {
+         return 0;
+      }
+      return 1 + std::max(CalculateHeight(Node->left), CalculateHeight(Node->right));
+   }
+   return 0;
+}
+
+int CalculateReturnToRootFullWalk(const NodeType* Node)
+{
+   if(Node)
+   {
+      const auto NumVisits{(Node->left ? 2 : 0) + (Node->right ? 2 : 0)};
+      return NumVisits + CalculateReturnToRootFullWalk(Node->left) + CalculateReturnToRootFullWalk(Node->right);
+   }
+   return 0;
+}
+
+void ReadTree()
+{
+   std::println("Read Tree - Example Format ((4 9) 15)");
+
+   BinaryTree::BinaryTree<NodeValueType> Tree;
+   std::string                           DigitBuffer;
+   std::string                           TreeDescription;
+   char                                  Next{};
+   NodeType*                             CurrentNode;
+   std::stack<NodeType*>                 NodeStack;
+
+   Next = std::cin.get();
+
+   if(Next != '(' && std::cin)
+   {
+      std::print("Tree should start with (");
+   }
+   else
+   {
+      std::unique_ptr<NodeType> NewNode{std::make_unique<NodeType>()};
+      CurrentNode = NewNode.get();
+      Tree.AddNode(std::move(NewNode));
+   }
+
+   while(CurrentNode)
+   {
+      std::cin.get(Next);
+
+      if(!std::cin)
+      {
+         std::println("Error getting next character");
+      }
+
+      if(Next == '(')
+      {
+         NodeStack.push(CurrentNode);
+         std::unique_ptr<NodeType> NewNode{std::make_unique<NodeType>()};
+
+         if(!CurrentNode->left)
+         {
+            CurrentNode->left = NewNode.get();
+         }
+         else
+         {
+            CurrentNode->right = NewNode.get();
+         }
+
+         CurrentNode = NewNode.get();
+         Tree.AddNode(std::move(NewNode));
+      }
+      else if(std::isdigit(Next))
+      {
+         DigitBuffer = Next;
+         while(isdigit(static_cast<char>(std::cin.peek())))
+         {
+            if(!std::cin)
+            {
+               std::println("Error reading over digits");
+            }
+
+            DigitBuffer += std::cin.get();
+         }
+
+         const auto                Value{std::stoi(DigitBuffer)};
+         std::unique_ptr<NodeType> NewNode{std::make_unique<NodeType>(Value)};
+
+         if(!CurrentNode->left)
+         {
+            CurrentNode->left = NewNode.get();
+         }
+         else
+         {
+            CurrentNode->right = NewNode.get();
+         }
+         Tree.AddNode(std::move(NewNode));
+      }
+      else if(Next == ')')
+      {
+         if(!NodeStack.empty())
+         {
+            CurrentNode = NodeStack.top();
+            NodeStack.pop();
+         }
+         else
+         {
+            CurrentNode = nullptr;
+         }
+      }
+   }
+
+   for(const auto& Node : Tree.GetNodes())
+   {
+      std::visit(NodePrinter{}, Node->data);
+      if(Node->left)
+      {
+         std::print(" ");
+         std::visit(NodePrinter{}, Node->left->data);
+      }
+
+      if(Node->right)
+      {
+         std::print(" ");
+         std::visit(NodePrinter{}, Node->right->data);
+      }
+      std::cout << "\n";
    }
 }
 
@@ -75,4 +236,14 @@ int main()
    C.right = &G;
 
    InorderTraversalStack(A);
+
+   const auto Height{CalculateHeight(&A)};
+   const auto FullWalkReturnToRoot{CalculateReturnToRootFullWalk(&A)};
+   std::println("Num Nodes {}", ChildOnlyTraversal(&A));
+   std::println("Num Leaves {}", LeafOnlyTraversal(&A));
+   std::println("Height {}", Height);
+   std::println("Return to Root Walk Max Distance {}", FullWalkReturnToRoot);
+   std::println("Return to Root Walk Distance {}", FullWalkReturnToRoot - Height);
+
+   ReadTree();
 }

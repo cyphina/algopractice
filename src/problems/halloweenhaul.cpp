@@ -1,6 +1,7 @@
 #include <iostream>
 #include <locale>
 #include <print>
+#include <sstream>
 #include <stack>
 #include <string>
 #include <variant>
@@ -95,7 +96,27 @@ int CalculateReturnToRootFullWalk(const NodeType* Node)
    return 0;
 }
 
-void ReadTree()
+void PrintTree(const BinaryTree::BinaryTree<NodeValueType>& Tree)
+{
+   for(const auto& Node : Tree.GetNodes())
+   {
+      std::visit(NodePrinter{}, Node->data);
+      if(Node->left)
+      {
+         std::print(" ");
+         std::visit(NodePrinter{}, Node->left->data);
+      }
+
+      if(Node->right)
+      {
+         std::print(" ");
+         std::visit(NodePrinter{}, Node->right->data);
+      }
+      std::cout << "\n";
+   }
+}
+
+BinaryTree::BinaryTree<NodeValueType> ReadTree()
 {
    std::println("Read Tree - Example Format ((4 9) 15)");
 
@@ -185,22 +206,71 @@ void ReadTree()
       }
    }
 
-   for(const auto& Node : Tree.GetNodes())
-   {
-      std::visit(NodePrinter{}, Node->data);
-      if(Node->left)
-      {
-         std::print(" ");
-         std::visit(NodePrinter{}, Node->left->data);
-      }
+   return Tree;
+}
 
-      if(Node->right)
+NodeType* ReadTreeRecursiveImpl(std::istream& in, BinaryTree::BinaryTree<NodeValueType>& Tree)
+{
+   char                      Next;
+   std::unique_ptr<NodeType> NewNode{nullptr};
+   NodeType*                 NewNodePtr{nullptr};
+
+   std::string Remaining;
+
+   while(in.get(Next))
+   {
+      if(isdigit(Next))
       {
-         std::print(" ");
-         std::visit(NodePrinter{}, Node->right->data);
+         std::string Number{Next};
+         while(isdigit(static_cast<char>(in.peek())))
+         {
+            in.get(Next);
+            Number += Next;
+         }
+
+         int Value{std::stoi(Number)};
+         NewNode    = std::make_unique<NodeType>(Value);
+         NewNodePtr = NewNode.get();
+
+         Tree.AddNode(std::move(NewNode));
+         return NewNodePtr;
       }
-      std::cout << "\n";
+      else if(Next == '(')
+      {
+         NewNode    = std::make_unique<NodeType>();
+         NewNodePtr = NewNode.get();
+         // We'll let the tokenizing occuring in each subtree advance the stream.
+         const auto LeftNode{ReadTreeRecursiveImpl(in, Tree)};
+         const auto RightNode{ReadTreeRecursiveImpl(in, Tree)};
+
+         NewNode->left  = LeftNode;
+         NewNode->right = RightNode;
+         Tree.AddNode(std::move(NewNode));
+      }
+      else if(Next == ')')
+      {
+         return NewNodePtr;
+      }
    }
+
+   return nullptr;
+}
+
+BinaryTree::BinaryTree<NodeValueType> ReadTreeRecursive()
+{
+   std::println("Read Tree - Example Format ((4 9) 15)");
+
+   std::string Line;
+   std::getline(std::cin, Line);
+   BinaryTree::BinaryTree<NodeValueType> Tree;
+
+   if(std::cin)
+   {
+      std::istringstream S{Line};
+      ReadTreeRecursiveImpl(S, Tree);
+   }
+
+   return Tree;
 }
 
 int main()
@@ -245,5 +315,7 @@ int main()
    std::println("Return to Root Walk Max Distance {}", FullWalkReturnToRoot);
    std::println("Return to Root Walk Distance {}", FullWalkReturnToRoot - Height);
 
-   ReadTree();
+   const auto Tree2 = ReadTreeRecursive();
+   PrintTree(Tree2);
+   std::println("Num Nodes {}", ChildOnlyTraversal(Tree2.GetNodes()[0].get()));
 }

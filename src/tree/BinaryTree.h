@@ -14,7 +14,7 @@ namespace BinaryTree
       Node* right;
    };
 
-   // Balanced binary tree.
+   /** A container for nodes to keep them alive while we do stuff */
    template <typename T>
    class BinaryTree
    {

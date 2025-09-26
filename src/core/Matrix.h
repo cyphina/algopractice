@@ -28,7 +28,7 @@ namespace Core
       T& At(size_t Row, size_t Column);
       T  At(size_t Row, size_t Column) const;
 
-      template <int C2>
+      template <size_t C2>
       Matrix<T, RowSize, C2> MultiplyMatrix(const Matrix<T, ColumnSize, C2>& A) const;
 
       const T& operator[](std::size_t X, std::size_t Y) const;
@@ -77,7 +77,7 @@ namespace Core
    }
 
    template <typename T, std::size_t R, std::size_t C>
-   template <int C2>
+   template <size_t C2>
    Matrix<T, R, C2> Matrix<T, R, C>::MultiplyMatrix(const Matrix<T, C, C2>& A) const
    {
       Matrix<T, R, C2> Result;

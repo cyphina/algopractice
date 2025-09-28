@@ -19,10 +19,12 @@ namespace NaryTree
    template <typename T>
    class NaryTree
    {
-      using NodeList = std::unordered_set<Node<T>>;
-
     public:
-      void            AddNode(const Node<T>& Node);
+      using NodeType = std::unique_ptr<Node<T>>;
+      using NodeList = std::unordered_set<NodeType,>;
+
+      // Use unique pointers to keep pointers valid for the tree even after the underlying data structure reallocates.
+      Node<T>*        AddNode(const T& Data);
       const NodeList& GetNodes() const { return nodes; }
       const T*        FindNode(const T& Data);
 
@@ -49,9 +51,10 @@ namespace NaryTree
    }
 
    template <typename T>
-   Node<T> NaryTree<T>::AddNode(const Node<T>& Node)
+   Node<T>* NaryTree<T>::AddNode(const T& Data)
    {
-      return nodes.emplace(Node);
+      const auto Result{nodes.emplace(std::make_unique<Node<T>>(Data))};
+      return Result.second ? Result.first->get() : nullptr;
    }
 
    template <typename T>
@@ -62,11 +65,12 @@ namespace NaryTree
    }
 }
 
-namespace std
-{
-   template <typename T>
-   struct hash<NaryTree::Node<T>>
-   {
-      size_t operator()(const NaryTree::Node<T>& Node) const { return std::hash<T>{}(Node.data); }
-   };
-}
+// Only use a global hash specialization if we're storing the actual node objects directly.
+//namespace std
+//{
+//   template <typename T>
+//   struct hash<std::unique_ptr<NaryTree::Node<T>>>
+//   {
+//      size_t operator()(const NaryTree::Node<T>& Node) const { return std::hash<T>{}(Node.data); }
+//   };
+//}

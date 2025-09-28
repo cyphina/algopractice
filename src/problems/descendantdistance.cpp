@@ -5,26 +5,32 @@
 
 namespace
 {
-   using NodeType = NaryTree::Node<std::string>;
+   using NodeType = std::string;
+   using Node     = NaryTree::Node<NodeType>;
+   // Ultimately we'll store a unique pointer to things in case we have to reallocate the underlying data for the set.
+   using NodePtr = std::unique_ptr<NaryTree::Node<NodeType>>;
 }
 
 int main()
 {
    std::println("Descendant Distance - Score is how many descendants a family member has at distance d (d edges below).");
 
-   int NumInputs{0};
+   size_t NumInputs{0};
    std::cin >> NumInputs;
 
-   if(std::cin)
+   for(size_t TestCaseIndex {0}; std::cin && TestCaseIndex < NumInputs; ++TestCaseIndex)
    {
-      int NumLinesToBuildTree{0}, DescendantDistanceOfInterest{0};
+      std::println("Text Case Index {}", TestCaseIndex);
+
+      size_t NumLinesToBuildTree{0}, DescendantDistanceOfInterest{0};
       std::cin >> NumLinesToBuildTree >> DescendantDistanceOfInterest;
 
-      if(std::cin)
+      if(std::cin && NumLinesToBuildTree > 0)
       {
-         int                             NumChildren{0};
+         size_t                             NumChildren{0};
          std::string                     NodeName{0};
          NaryTree::NaryTree<std::string> Tree;
+         Node*                           ParentNode{nullptr};
 
          for(size_t i{0}; std::cin && i < NumLinesToBuildTree; ++i)
          {
@@ -32,17 +38,32 @@ int main()
             std::cin >> NodeName >> NumChildren;
             if(std::cin)
             {
-               Tree.AddNode(NodeType{NodeName});
-               for(size_t j{0}; std::cin && j < NumChildren; ++j)
+               if(!Tree.FindNode(NodeName))
                {
-                  std::cin >> NodeName;
-                  if(!Tree.FindNode(NodeName))
+                  ParentNode = {Tree.AddNode(NodeType{NodeName})};
+               }
+
+               if(ParentNode)
+               {
+                  for(size_t j{0}; std::cin && j < NumChildren; ++j)
                   {
-                     Tree.AddNode(NodeType{NodeName});
+                     std::cin >> NodeName;
+                     if(!Tree.FindNode(NodeName))
+                     {
+                        const auto ChildNode{Tree.AddNode(NodeType{NodeName})};
+                        if(ParentNode && ChildNode)
+                        {
+                           ParentNode->children.emplace_back(ChildNode);
+                        }
+                     }
                   }
                }
             }
          }
+
+         // Need to get descendant distance results
       }
    }
+
+   std::println("Finished Input Processing");
 }

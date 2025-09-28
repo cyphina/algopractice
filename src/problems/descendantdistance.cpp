@@ -14,11 +14,14 @@ namespace
 int main()
 {
    std::println("Descendant Distance - Score is how many descendants a family member has at distance d (d edges below).");
+   std::println("Print num inputs.");
 
    size_t NumInputs{0};
    std::cin >> NumInputs;
 
-   for(size_t TestCaseIndex {0}; std::cin && TestCaseIndex < NumInputs; ++TestCaseIndex)
+   std::println("{} Test Cases!", NumInputs);
+
+   for(size_t TestCaseIndex{0}; std::cin && TestCaseIndex < NumInputs; ++TestCaseIndex)
    {
       std::println("Text Case Index {}", TestCaseIndex);
 
@@ -27,7 +30,9 @@ int main()
 
       if(std::cin && NumLinesToBuildTree > 0)
       {
-         size_t                             NumChildren{0};
+         std::println("{} lines to build tree", NumLinesToBuildTree);
+
+         size_t                          NumChildren{0};
          std::string                     NodeName{0};
          NaryTree::NaryTree<std::string> Tree;
          Node*                           ParentNode{nullptr};
@@ -38,6 +43,8 @@ int main()
             std::cin >> NodeName >> NumChildren;
             if(std::cin)
             {
+               std::println("{} parent, {} children", NodeName, NumChildren);
+
                if(!Tree.FindNode(NodeName))
                {
                   ParentNode = {Tree.AddNode(NodeType{NodeName})};
@@ -62,6 +69,11 @@ int main()
          }
 
          // Need to get descendant distance results
+
+         for(const auto& Node : Tree.GetNodes())
+         {
+            std::println("{}", Node->data);
+         }
       }
    }
 

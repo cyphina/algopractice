@@ -44,7 +44,9 @@ namespace NaryTree
       // Use unique pointers to keep pointers valid for the tree even after the underlying data structure reallocates.
       Node<T>*        AddNode(const T& Data);
       const NodeList& GetNodes() const { return nodes; }
-      const Node<T>*  FindNode(const T& Data);
+      Node<T>*        FindNode(const T& Data);
+
+      int DescendantDistance(const Node<T>& Node, int DistanceTrack);
 
     private:
       NodeList nodes;
@@ -76,9 +78,26 @@ namespace NaryTree
    }
 
    template <typename T>
-   const Node<T>* NaryTree<T>::FindNode(const T& Data)
+   Node<T>* NaryTree<T>::FindNode(const T& Data)
    {
       auto It{nodes.find(Data)};
       return It != nodes.end() ? (*It).get() : nullptr;
+   }
+
+   template <typename T>
+   int NaryTree<T>::DescendantDistance(const Node<T>& Node, int DistanceTrack)
+   {
+      if(DistanceTrack == 1)
+      {
+         return Node.children.size();
+      }
+
+      int DescendantDistanceSum{0};
+      for(int i = 0; i < Node.children.size(); ++i)
+      {
+         DescendantDistanceSum += DescendantDistance(*Node.children[i], DistanceTrack - 1);
+      }
+
+      return DescendantDistanceSum;
    }
 }

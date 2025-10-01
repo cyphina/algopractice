@@ -1,5 +1,6 @@
 #include <iostream>
 #include <print>
+#include <vector>
 
 // 4 9 22 - 3 burgers
 // 4 9 54 - Max number of burgers multiple feasible solutions. 6 9-minute or 9 4-minute and 2 9-minute.
@@ -7,8 +8,10 @@
 
 struct BurgerProblemResult
 {
-   int BurgersEaten;
-   int TimeRemaining;
+   int BurgersEaten{-1};
+   int TimeRemaining{-1};
+
+   bool IsSet() const { return BurgersEaten != -1; }
 
    [[nodiscard]] auto operator<=>(const int& Rhs) const;
 };
@@ -18,11 +21,17 @@ auto BurgerProblemResult::operator<=>(const int& Rhs) const
    return TimeRemaining <=> Rhs;
 }
 
+static int TotalCalls{};
+
 /**
  * Our version actually handles tie breakers...
+ * Make sure to pass in a vector that is actually sized to T + 1 since we fill out 0 atm...
  */
-BurgerProblemResult SolveBurgerProblem(int N, int M, int T)
+BurgerProblemResult SolveBurgerProblem(int N, int M, int T, std::vector<BurgerProblemResult>& Memo)
 {
+   ++TotalCalls;
+   std::println("{} Total Calls", TotalCalls);
+
    if(T == 0)
    {
       //std::println("T - {}", T);
@@ -40,12 +49,26 @@ BurgerProblemResult SolveBurgerProblem(int N, int M, int T)
 
    if(M <= T)
    {
-      Result1 = SolveBurgerProblem(N, M, T - M);
+      if(!Memo[T - M].IsSet())
+      {
+         Result1 = SolveBurgerProblem(N, M, T - M, Memo);
+      }
+      else
+      {
+         Result1 = Memo[T - M];
+      }
    }
 
    if(N <= T)
    {
-      Result2 = SolveBurgerProblem(N, M, T - N);
+      if(!Memo[T - N].IsSet())
+      {
+         Result2 = SolveBurgerProblem(N, M, T - N, Memo);
+      }
+      else
+      {
+         Result2 = Memo[T - N];
+      }
    }
 
    BurgerProblemResult Result;
@@ -103,7 +126,76 @@ BurgerProblemResult SolveBurgerProblem(int N, int M, int T)
 
    //std::println("T {} - Time Remaining {} - - Burger 1 Result {} - Burger 2 Result {}", T, Result.TimeRemaining, Burger1Result.BurgersEaten,
    //             Burger2Result.BurgersEaten);
+
+   std::println("Memoized {}!", T);
+   Memo[T] = Result;
    return Result;
+}
+
+BurgerProblemResult SolveBurgerProblemDynamic(int M, int N, int T)
+{
+   std::vector<BurgerProblemResult> Dp{static_cast<size_t>(T + 1)};
+   if(!Dp.empty())
+   {
+      Dp[0] = {.BurgersEaten = 0, .TimeRemaining = 0};
+   }
+
+   BurgerProblemResult Result1, Result2;
+   for(int i = 1; i < Dp.size(); ++i)
+   {
+      if(i >= M)
+      {
+         Result1 = Dp[i - M];
+      }
+
+      if(i >= N)
+      {
+         Result2 = Dp[i - N];
+      }
+
+      if(Result1.IsSet() && Result2.IsSet())
+      {
+         if(Result1.TimeRemaining == Result2.TimeRemaining)
+         {
+            if(Result1.BurgersEaten > Result2.BurgersEaten)
+            {
+               Dp[i] = Result1;
+            }
+            else
+            {
+               Dp[i] = Result2;
+            }
+         }
+         else
+         {
+            if(Result1.TimeRemaining < Result2.TimeRemaining)
+            {
+               Dp[i] = Result1;
+            }
+            else
+            {
+               Dp[i] = Result2;
+            }
+         }
+      }
+      else if(Result1.IsSet())
+      {
+         Dp[i] = Result1;
+      }
+      else if(Result2.IsSet())
+      {
+         Dp[i] = Result2;
+      }
+      else
+      {
+         Dp[i] = Dp[i - 1];
+         ++Dp[i].TimeRemaining;
+      }
+
+      ++Dp[i].BurgersEaten;
+   }
+
+   return Dp[T];
 }
 
 /** Version book has but it just returns -1 if you don't have an optimal solution. */
@@ -156,7 +248,7 @@ BurgerProblemResult SolveBurgerProblemBookWithRemainingTime(int M, int N, int T)
 int main()
 {
    std::println("Burger Problem. Input Num Minutes to Eat First Burger n, Num Minutes to Eat Second Burger m, then How Much Time we Have to Eat t");
-   int EatTimeFirstBurger{}, EatTimeSecondBurger{}, TotalEatTime{};
+   size_t EatTimeFirstBurger{}, EatTimeSecondBurger{}, TotalEatTime{};
 
    std::println("-1 To Quit");
    while(std::cin >> EatTimeFirstBurger && EatTimeFirstBurger != -1)
@@ -164,7 +256,11 @@ int main()
       std::cin >> EatTimeSecondBurger >> TotalEatTime;
       if(std::cin)
       {
-         const auto Result{SolveBurgerProblem(EatTimeFirstBurger, EatTimeSecondBurger, TotalEatTime)};
+         // +1 since we have to store from [0, T]. That's what the algo checks...
+         //std::vector<BurgerProblemResult> Memo{TotalEatTime + 1};
+         //const auto Result{SolveBurgerProblem(EatTimeFirstBurger, EatTimeSecondBurger, TotalEatTime, Memo)};
+
+         const auto Result{SolveBurgerProblemDynamic(EatTimeFirstBurger, EatTimeSecondBurger, TotalEatTime)};
          std::println("Result - {} - Time Remaining - {}", Result.BurgersEaten, Result.TimeRemaining);
 
          /*const auto BookResult{SolveBurgerProblemBookWithRemainingTime(EatTimeFirstBurger, EatTimeSecondBurger, TotalEatTime)};

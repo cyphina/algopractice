@@ -209,6 +209,9 @@ BinaryTree::BinaryTree<NodeValueType> ReadTree()
    return Tree;
 }
 
+/**
+ * Recursive Descent Parse
+ */
 NodeType* ReadTreeRecursiveImpl(std::istream& in, BinaryTree::BinaryTree<NodeValueType>& Tree)
 {
    char                      Next;

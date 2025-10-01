@@ -17,7 +17,7 @@ int main()
          std::cin >> NumPeopleInLines[i];
       }
 
-      const auto FoodLinesResults{FoodLines::foodLine(NumLines, NumPeople, NumPeopleInLines)};
+      const auto FoodLinesResults{FoodLines::FoodLine(NumLines, NumPeople, NumPeopleInLines)};
 
       for(const auto& FoodLineResult : FoodLinesResults)
       {

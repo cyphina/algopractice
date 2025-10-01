@@ -18,79 +18,139 @@ auto BurgerProblemResult::operator<=>(const int& Rhs) const
    return TimeRemaining <=> Rhs;
 }
 
+/**
+ * Our version actually handles tie breakers...
+ */
 BurgerProblemResult SolveBurgerProblem(int N, int M, int T)
 {
    if(T == 0)
    {
-      std::println("T - {}", T);
+      //std::println("T - {}", T);
       return {0, 0};
    }
 
    if(T < 0)
    {
-      std::println("T - {}", T);
+      //std::println("T - {}", T);
       return {-1, T};
    }
 
-   auto Burger1Result{SolveBurgerProblem(N, M, T - N)};
-   auto Burger2Result{SolveBurgerProblem(N, M, T - M)};
+   BurgerProblemResult Result1{0, -1};
+   BurgerProblemResult Result2{0, -1};
+
+   if(M <= T)
+   {
+      Result1 = SolveBurgerProblem(N, M, T - M);
+   }
+
+   if(N <= T)
+   {
+      Result2 = SolveBurgerProblem(N, M, T - N);
+   }
 
    BurgerProblemResult Result;
 
-   if(Burger1Result < 0)
+   if(Result1 < 0)
    {
-      if(Burger2Result < 0)
+      if(Result2 < 0)
       {
          // Eat no burgers everything is leftover.
          Result = {0, T};
       }
       else
       {
-         Burger2Result.BurgersEaten += 1;
-         Result = Burger2Result;
+         Result2.BurgersEaten += 1;
+         Result = Result2;
       }
    }
    else
    {
-      Burger1Result.BurgersEaten += 1;
+      Result1.BurgersEaten += 1;
 
       // Both are feasible answers
-      if(Burger2Result >= 0)
+      if(Result2 >= 0)
       {
-         Burger2Result.BurgersEaten += 1;
-         if(Burger1Result.TimeRemaining == Burger2Result.TimeRemaining)
+         Result2.BurgersEaten += 1;
+         if(Result1.TimeRemaining == Result2.TimeRemaining)
          {
-            if(Burger1Result.BurgersEaten > Burger2Result.BurgersEaten)
+            if(Result1.BurgersEaten > Result2.BurgersEaten)
             {
-               Result = Burger1Result;
+               Result = Result1;
             }
             else
             {
-               Result = Burger2Result;
+               Result = Result2;
             }
          }
          else
          {
             // Less time to drink beer is favored
-            if(Burger1Result.TimeRemaining < Burger2Result.TimeRemaining)
+            if(Result1.TimeRemaining < Result2.TimeRemaining)
             {
-               Result = Burger1Result;
+               Result = Result1;
             }
             else
             {
-               Result = Burger2Result;
+               Result = Result2;
             }
          }
       }
       else
       {
-         Result = Burger1Result;
+         Result = Result1;
       }
    }
 
-   std::println("T {} - Time Remaining {} - - Burger 1 Result {} - Burger 2 Result {}", T, Result.TimeRemaining, Burger1Result.BurgersEaten,
-                Burger2Result.BurgersEaten);
+   //std::println("T {} - Time Remaining {} - - Burger 1 Result {} - Burger 2 Result {}", T, Result.TimeRemaining, Burger1Result.BurgersEaten,
+   //             Burger2Result.BurgersEaten);
    return Result;
+}
+
+/** Version book has but it just returns -1 if you don't have an optimal solution. */
+int SolveBurgerProblemResultBook(int M, int N, int T)
+{
+   int First{}, Second{};
+   if(T == 0)
+   {
+      return 0;
+   }
+
+   if(T >= M)
+   {
+      First = SolveBurgerProblemResultBook(M, N, T - M);
+   }
+   else
+   {
+      First = -1;
+   }
+
+   if(T >= N)
+   {
+      Second = SolveBurgerProblemResultBook(M, N, T - N);
+   }
+   else
+   {
+      Second = -1;
+   }
+
+   if(First == -1 && Second == -1)
+   {
+      return -1;
+   }
+
+   return std::max(First, Second) + 1;
+}
+
+BurgerProblemResult SolveBurgerProblemBookWithRemainingTime(int M, int N, int T)
+{
+   auto Result{SolveBurgerProblemResultBook(M, N, T)};
+   int  BackwardsSum{0};
+   while(Result == -1)
+   {
+      ++BackwardsSum;
+      Result = SolveBurgerProblemResultBook(M, N, T - BackwardsSum);
+   }
+   return {Result, BackwardsSum};
 }
 
 int main()
@@ -106,6 +166,9 @@ int main()
       {
          const auto Result{SolveBurgerProblem(EatTimeFirstBurger, EatTimeSecondBurger, TotalEatTime)};
          std::println("Result - {} - Time Remaining - {}", Result.BurgersEaten, Result.TimeRemaining);
+
+         /*const auto BookResult{SolveBurgerProblemBookWithRemainingTime(EatTimeFirstBurger, EatTimeSecondBurger, TotalEatTime)};
+         std::println("Book Result - {} - Time Remaining - {}", BookResult.BurgersEaten, BookResult.TimeRemaining);*/
       }
 
       std::println("-1 To Quit");

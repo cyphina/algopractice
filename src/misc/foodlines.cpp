@@ -4,7 +4,7 @@
 
 namespace
 {
-   void shortestLineIndex(int NumPeople, std::vector<int>& NumPeopleInLines, std::vector<FoodLines::LineJoinerData>& NumberOfPeopleInLineAtJoinPoint)
+   void ShortestLineIndex(int NumPeople, std::vector<int>& NumPeopleInLines, std::vector<FoodLines::LineJoinerData>& NumberOfPeopleInLineAtJoinPoint)
    {
       for(int i = 0; i < NumPeople; ++i)
       {
@@ -24,7 +24,7 @@ namespace
    }
 }
 
-std::vector<FoodLines::LineJoinerData> FoodLines::foodLine(int NumLines, int NumPeople, const std::vector<int>& InitialPeopleInLinesCount)
+std::vector<FoodLines::LineJoinerData> FoodLines::FoodLine(int NumLines, int NumPeople, const std::vector<int>& InitialPeopleInLinesCount)
 {
    assert(InitialPeopleInLinesCount.size() <= NumLines);
 
@@ -45,7 +45,7 @@ std::vector<FoodLines::LineJoinerData> FoodLines::foodLine(int NumLines, int Num
 
    std::vector<FoodLines::LineJoinerData> NumberOfPeopleInLineAtJoinPoint;
 
-   shortestLineIndex(NumPeople, NumPeopleInLines, NumberOfPeopleInLineAtJoinPoint);
+   ShortestLineIndex(NumPeople, NumPeopleInLines, NumberOfPeopleInLineAtJoinPoint);
 
    return NumberOfPeopleInLineAtJoinPoint;
 }

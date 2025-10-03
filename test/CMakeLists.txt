@@ -9,6 +9,7 @@ file(GLOB_RECURSE ALGO_SOURCES CONFIGURE_DEPENDS
     sorting/*.cpp
     core/*.cpp
     misc/*.cpp
+    memoization/*.cpp
 )
 
 # Generate Visual Studio filters based on folder structure

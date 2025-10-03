@@ -14,6 +14,6 @@ TEST_CASE("Test OneOffSpellCheck", "[spellcheck]")
    const auto Result5{OneOffSpellCheck::IsStringOneOff("abcdxxexxf", "abcdxxexxxf")};
    REQUIRE((Result5->first == 7 && Result5->second == 10));
    const auto Result6{OneOffSpellCheck::IsStringOneOff("a", "ab")};
-   REQUIRE((Result6->first == 1 && Result5->second == 2));
-   REQUIRE(OneOffSpellCheck::IsStringOneOff("abasdfasdf", "abdsdfaddf").has_value() == false);
+   REQUIRE((Result6->first == 1 && Result6->second == 2));
+   REQUIRE(OneOffSpellCheck::IsStringOneOff("abasdfasdf", "abdsdefaddf").has_value() == false);
 }

@@ -5,6 +5,7 @@ file(GLOB_RECURSE ALGO_SOURCES CONFIGURE_DEPENDS
     core/*.cpp
     misc/*.cpp
     tree/*.cpp
+    memoization/*.cpp
 )
 
 file(GLOB_RECURSE ALGO_HEADERS CONFIGURE_DEPENDS
@@ -14,6 +15,7 @@ file(GLOB_RECURSE ALGO_HEADERS CONFIGURE_DEPENDS
     core/*.h
     misc/*.h
     tree/*.h
+    memoization/*.h
 )
 
 # Combine all source files

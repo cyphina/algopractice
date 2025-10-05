@@ -4,9 +4,12 @@ export template <typename T>
 class Grid
 {
  public:
-   explicit Grid(size_t width = DefaultWidth, size_t height = DefaultHeight);
+   explicit Grid(size_t Width = DefaultWidth, size_t Height = DefaultHeight);
    virtual ~Grid() = default;
 
-   Grid(const Grid& Source)         = default;
-   Grid& operator=(const Grid& RHS) = default;
+   Grid(const Grid& Src)            = default;
+   Grid& operator=(const Grid& Rhs) = default;
+
+   Grid(Grid&& Src)            = default;
+   Grid& operator=(Grid&& Rhs) = default;
 };

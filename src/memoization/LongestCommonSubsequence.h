@@ -13,8 +13,11 @@ namespace LongestCommonSubsequence
 
    struct HockeyCommonSubsequenceResult
    {
-      std::vector<int> GameIndex;
-      uint64_t         MaxRivalGamePoints{};
+      std::vector<std::pair<int, int>> GameIndices;
+      uint64_t                         MaxRivalGamePoints{};
+
+      [[nodiscard]] bool                 operator==(const HockeyCommonSubsequenceResult& Rhs) const = default;
+      [[nodiscard]] std::strong_ordering operator<=>(const HockeyCommonSubsequenceResult& Rhs) const;
    };
 
    struct HockeyGameResultData
@@ -24,24 +27,8 @@ namespace LongestCommonSubsequence
    };
 
    /**
-    * 
+    * Variation of LCS with some rules about when a hockey game.
     */
-   inline HockeyCommonSubsequenceResult HockeyCommonSubsequence(const std::vector<HockeyGameResultData>& Team1Results,
-                                                                const std::vector<HockeyGameResultData>& Team2Results, int Seq1SubproblemIndex,
-                                                                int Seq2SubproblemIndex, Core::Grid<HockeyGameResultData>& Memo)
-   {
-      if(Seq1SubproblemIndex == 0 && Seq2SubproblemIndex == 0)
-      {
-         return {};
-      }
-
-      HockeyCommonSubsequenceResult MaxResult;
-
-      // 1 - Optimal solution uses final games.
-      // 2 - Optional solution doesn't use final games.
-      // 3 - Ignore last result of team 1.
-      // 4 - Ignore last result of team 2.
-
-      return MaxResult;
-   }
+   HockeyCommonSubsequenceResult HockeyCommonSubsequence(const std::vector<HockeyGameResultData>& Team1Results,
+                                                         const std::vector<HockeyGameResultData>& Team2Results);
 }

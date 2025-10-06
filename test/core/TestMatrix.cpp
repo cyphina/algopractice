@@ -18,7 +18,7 @@ TEST_CASE("Matrix Multiplication", "[matrix]")
 {
    const Core::Matrix<int, 3, 3> Mat1{1, 2, 3, 1, 2, 3, 1, 2, 3};
    const Core::Matrix<int, 3, 3> Mat2{1, 2, 3, 1, 2, 3, 1, 2, 3};
-   const auto                    Mat3 = Mat1.MultiplyMatrix(Mat2);
+   const auto                    Mat3{Mat1.MultiplyMatrix(Mat2)};
 
    REQUIRE(Mat3[0, 0] == 6);
    REQUIRE(Mat3[2, 2] == 18);

@@ -112,12 +112,12 @@ namespace Core
    {
       if(Row >= m_height)
       {
-         throw std::out_of_range{std::format("X ({}) must be less than width ({}).", Row, m_width)};
+         throw std::out_of_range{std::format("Row ({}) must be less than width ({}).", Row, m_width)};
       }
 
       if(Col >= m_width)
       {
-         throw std::out_of_range{std::format("Y ({}) must be less than height ({}).", Col, m_height)};
+         throw std::out_of_range{std::format("Row ({}) must be less than height ({}).", Col, m_height)};
       }
    }
 }

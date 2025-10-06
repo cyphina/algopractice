@@ -1,6 +1,7 @@
 {
     "files.associations": {
         "*.mdx": "typescriptreact",
-        "ranges": "cpp"
+        "ranges": "cpp",
+        "concepts": "cpp"
     }
 }

@@ -31,4 +31,7 @@ namespace LongestCommonSubsequence
     */
    HockeyCommonSubsequenceResult HockeyCommonSubsequence(const std::vector<HockeyGameResultData>& Team1Results,
                                                          const std::vector<HockeyGameResultData>& Team2Results);
+
+   HockeyCommonSubsequenceResult HockeyCommonSubsequenceDynamic(const std::vector<HockeyGameResultData>& Team1Results,
+                                                                const std::vector<HockeyGameResultData>& Team2Results);
 }

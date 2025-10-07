@@ -124,4 +124,67 @@ namespace LongestCommonSubsequence
       return HockeyCommonSubsequenceImpl(Team1Results, Team2Results, Team1Results.size() - 1, Team2Results.size() - 1,
                                          Memo);
    }
+
+   HockeyCommonSubsequenceResult HockeyCommonSubsequenceDynamic(const std::vector<HockeyGameResultData>& Team1Results,
+                                                                const std::vector<HockeyGameResultData>& Team2Results)
+   {
+      // Here the 0s will represent empty Result arrays
+      Core::Grid<HockeyCommonSubsequenceResult> Results{Team1Results.size() + 1, Team2Results.size() + 1};
+
+      // We'll solve subproblems in a way we lookup stuff already solved.
+      // Imagine solving team 1 results like [1], [1,2], [1,2,3] ... going horizontally
+      // team 2 results like [1], [1,2], [1,2,3], [1,2,3,4] ... going vertically
+
+      for(int i = 0; i < Results.GetWidth(); ++i)
+      {
+         Results[0, i] = {.GameIndices = {}, .MaxRivalGamePoints = 0};
+      }
+
+      for(int i = 0; i < Results.GetHeight(); ++i)
+      {
+         Results[i, 0] = {.GameIndices = {}, .MaxRivalGamePoints = 0};
+      }
+
+      for(int RowIndex = 1; RowIndex < Results.GetHeight(); ++RowIndex)
+      {
+         for(int ColumnIndex = 1; ColumnIndex < Results.GetWidth(); ++ColumnIndex)
+         {
+            const auto Team1Result{Team1Results[ColumnIndex - 1]};
+            const auto Team2Result{Team2Results[RowIndex - 1]};
+
+            HockeyCommonSubsequenceResult Case1Result;
+            if(Team1Result.Result != Team2Result.Result)
+            {
+               if(Team1Result.Result == HockeyGameResult::Win)
+               {
+                  if(Team1Result.PointsScored > Team2Result.PointsScored)
+                  {
+                     const auto& SubproblemResult{Results[RowIndex - 1, ColumnIndex - 1].value()};
+                     Case1Result.GameIndices = SubproblemResult.GameIndices;
+                     Case1Result.GameIndices.emplace_back(RowIndex, ColumnIndex);
+                     Case1Result.MaxRivalGamePoints =
+                         Team1Result.PointsScored + Team2Result.PointsScored + SubproblemResult.MaxRivalGamePoints;
+                  }
+               }
+               else
+               {
+                  const auto& SubproblemResult{Results[RowIndex - 1, ColumnIndex - 1].value()};
+                  Case1Result.GameIndices = SubproblemResult.GameIndices;
+                  Case1Result.GameIndices.emplace_back(RowIndex, ColumnIndex);
+                  Case1Result.MaxRivalGamePoints =
+                      Team1Result.PointsScored + Team2Result.PointsScored + SubproblemResult.MaxRivalGamePoints;
+               }
+            }
+
+            HockeyCommonSubsequenceResult& Case2Result{Results[RowIndex - 1, ColumnIndex - 1].value()};
+            HockeyCommonSubsequenceResult& Case3Result{Results[RowIndex - 1, ColumnIndex].value()};
+            HockeyCommonSubsequenceResult& Case4Result{Results[RowIndex, ColumnIndex - 1].value()};
+
+            std::array ResultsRange{Case1Result, Case2Result, Case3Result, Case4Result};
+            Results[RowIndex, ColumnIndex] = std::ranges::max(ResultsRange);
+         }
+      }
+
+      return Results[Results.GetWidth() - 1, Results.GetHeight() - 1].value();
+   }
 }

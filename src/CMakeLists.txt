@@ -34,6 +34,7 @@ add_library(sut STATIC ${ALGO_SOURCES})
 target_sources(sut PRIVATE ${ALGO_HEADERS})
 
 # compiler has rules on include lookup but we need to extend it to use our target paths
+# also make it public so our test target can get this too.
 target_include_directories(sut PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 
 # use after we defined sut

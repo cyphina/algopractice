@@ -9,6 +9,14 @@
 
 namespace Core
 {
+   struct GridCoordinate
+   {
+      size_t Row;
+      size_t Column;
+
+      [[nodiscard]] bool operator==(const GridCoordinate& Rhs) const = default;
+   };
+
    template <typename T>
    class Grid
    {

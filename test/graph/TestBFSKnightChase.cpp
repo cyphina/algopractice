@@ -22,4 +22,9 @@ TEST_CASE("Test BFS Knight Chase", "[bfs]")
    const auto                      Result2{BFSKnightChase::KnightChase(Board2, {2, 0}, {5, 0})};
    REQUIRE(Result2->NumMoves == 3);
    REQUIRE(Result2->Outcome == BFSKnightChase::ChaseResult::Stalemate);
+
+   BFSKnightChase::KnightChaseGrid Board3{7, 7};
+   const auto                      Result3{BFSKnightChase::KnightChase(Board2, {5, 0}, {0, 0})};
+   REQUIRE(Result3->NumMoves == 0);
+   REQUIRE(Result3->Outcome == BFSKnightChase::ChaseResult::PawnWin);
 }

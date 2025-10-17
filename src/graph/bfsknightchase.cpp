@@ -112,7 +112,6 @@ BFSKnightChase::KnightChase(KnightChaseGrid& Board, Core::GridCoordinate PawnSta
       return KnightChaseResult{0, ChaseResult::PawnWin};
    }
 
-   std::optional<size_t> MinMoves;
    std::optional<size_t> MinTiebreakMoves;
 
    size_t PawnMoveIndex{0};
@@ -121,19 +120,14 @@ BFSKnightChase::KnightChase(KnightChaseGrid& Board, Core::GridCoordinate PawnSta
       ++PawnMoveIndex;
 
       Core::GridCoordinate TargetCoord{RowIndex, PawnStart.Column};
-      const auto           OptimalNumMovesToSquare{FindKnightMinimalDistanceToSquare(Board, KnightStart, TargetCoord)};
 
-      if(OptimalNumMovesToSquare)
+      if(const auto OptimalNumMovesToSquare{FindKnightMinimalDistanceToSquare(Board, KnightStart, TargetCoord)})
       {
          const auto OptimalNumMovesToSquareValue{OptimalNumMovesToSquare.value()};
 
          if(OptimalNumMovesToSquareValue == PawnMoveIndex)
          {
-            if(!MinMoves.has_value() || OptimalNumMovesToSquareValue < MinMoves.value())
-            {
-               MinMoves = OptimalNumMovesToSquareValue;
-            }
-            continue;
+            return KnightChaseResult{OptimalNumMovesToSquareValue, ChaseResult::KnightWin};
          }
 
          // If knight can arrive here earlier then we can intercept or block.
@@ -143,16 +137,12 @@ BFSKnightChase::KnightChase(KnightChaseGrid& Board, Core::GridCoordinate PawnSta
             const auto InterceptNumMovesToSquare{OptimalNumMovesToSquareValue + PawnMoveIndex};
             if(InterceptNumMovesToSquare % 2 == 0)
             {
-               // Knight moves after pawn so it moves as much as pawn for capture.
-               if(!MinMoves.has_value() || PawnMoveIndex < MinMoves.value())
-               {
-                  MinMoves = PawnMoveIndex;
-                  continue;
-               }
+               // This is the first time we hit a square we can both arrive to checking one step at a time from the pawn so it's the least amount of moves
+               return KnightChaseResult{PawnMoveIndex, ChaseResult::KnightWin};
             }
             else
             {
-               if(!MinTiebreakMoves || PawnMoveIndex < MinTiebreakMoves.value())
+               if(!MinTiebreakMoves)
                {
                   // Knight moves before pawn so it moves one less than pawn for block.
                   MinTiebreakMoves = PawnMoveIndex;
@@ -162,20 +152,14 @@ BFSKnightChase::KnightChase(KnightChaseGrid& Board, Core::GridCoordinate PawnSta
       }
    }
 
-   // Tiebreaks
-   if(!MinMoves)
+   // We returned capture case above.
+
+   if(MinTiebreakMoves)
    {
-      if(MinTiebreakMoves)
-      {
-         return KnightChaseResult{MinTiebreakMoves.value(), ChaseResult::Stalemate};
-      }
-      else
-      {
-         return KnightChaseResult{0, ChaseResult::PawnWin};
-      }
+      return KnightChaseResult{MinTiebreakMoves.value(), ChaseResult::Stalemate};
    }
    else
    {
-      return KnightChaseResult{MinMoves.value(), ChaseResult::KnightWin};
+      return KnightChaseResult{0, ChaseResult::PawnWin};
    }
 }

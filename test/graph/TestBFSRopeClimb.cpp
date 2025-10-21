@@ -9,4 +9,7 @@ TEST_CASE("Test Rope Climb", "[bfs]")
 
    const auto RopeClimbResult2{RopeClimb::RopeClimb(4, 10, {2, 3, 8})};
    REQUIRE(RopeClimbResult2.value().Value == 5);
+
+   const auto RopeClimbResult3{RopeClimb::RopeClimb(5, 30000, {})};
+   REQUIRE(RopeClimbResult3.value().Value == 5);
 }

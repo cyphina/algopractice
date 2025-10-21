@@ -165,9 +165,11 @@ namespace RopeClimb
                                              {
                                                 return Cost.has_value();
                                              })};
-      if(!ValidCosts.empty())
+      auto ValidCostsToCheck{ValidCosts | std::views::drop(TargetSegmentIndex - 1)};
+
+      if(!ValidCostsToCheck.empty())
       {
-         const auto MinCost{std::ranges::min(ValidCosts | std::views::drop(TargetSegmentIndex - 1))};
+         const auto MinCost{std::ranges::min(ValidCostsToCheck)};
          return MinCost;
       }
       return {};

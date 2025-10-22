@@ -34,20 +34,22 @@ namespace HashUtils
    class HashTable
    {
     public:
+      HashTable();
+
       /**
        * Pair because with separate chaining we can have collisions in the same bucket.
        * Aka two items with different keys in same bucket so if we want the original key we need to store it */
       using Value_Type = std::pair<const KeyType, BucketItemType>;
 
       // Remember take an argument by value or by ref. Never do both or you get ambiguity since call by value can take any value type.
-      BucketItemType* Find(const KeyType& FindKey);
+      Value_Type* Find(const KeyType& FindKey);
 
       // Need another template parameter to get the perfect forawarding syntax even if we expect a BucketItem here.
       template <typename ItemType>
-      BucketItemType& Insert(const KeyType& K, ItemType&& Item);
+      Value_Type& Insert(const KeyType& K, ItemType&& Item);
 
       template <class... ItemConstructorParams>
-      BucketItemType& Emplace(const KeyType& K, ItemConstructorParams&&... Args);
+      Value_Type& Emplace(const KeyType& K, ItemConstructorParams&&... Args);
 
       /**
        * Ensure enough buckets for N elements
@@ -55,6 +57,10 @@ namespace HashUtils
       void Reserve(size_t N);
 
     private:
+      static constexpr short INITIAL_BUCKET_COUNT{32};
+
+      std::list<Value_Type>& GetBucketForKey(KeyType Key) { return buckets[hash(Key) % buckets.size()]; }
+
       /**
        * Redistribute how many buckets you are mapping to to spread the same hash value over more slots.
        * Need to recompute indices for existing elements.
@@ -67,12 +73,19 @@ namespace HashUtils
       KeyEqual                           equals;
    };
 
-   template <typename Key, typename BucketItem, typename Hash, class KeyEqual>
-   BucketItem* HashTable<Key, BucketItem, Hash, KeyEqual>::Find(const Key& FindKey)
+   template <typename KeyType, typename BucketItemType, typename Hash, class KeyEqual>
+   HashTable<KeyType, BucketItemType, Hash, KeyEqual>::HashTable()
    {
-      const auto& Bucket{buckets[hash(FindKey)]};
+      buckets.resize(INITIAL_BUCKET_COUNT);
+   }
 
-      for(const auto& Item : Bucket)
+   template <typename KeyType, typename BucketItemType, typename Hash, class KeyEqual>
+   typename HashTable<KeyType, BucketItemType, Hash, KeyEqual>::Value_Type*
+   HashTable<KeyType, BucketItemType, Hash, KeyEqual>::Find(const KeyType& FindKey)
+   {
+      auto& Bucket{buckets[hash(FindKey) % buckets.size()]};
+
+      for(auto& Item : Bucket)
       {
          if(Item.first == FindKey)
          {
@@ -83,18 +96,20 @@ namespace HashUtils
       return nullptr;
    }
 
-   template <typename Key, typename BucketItem, typename Hash, class KeyEqual>
-   template <typename Item>
-   BucketItem& HashTable<Key, BucketItem, Hash, KeyEqual>::Insert(const Key& K, Item&& Item)
+   template <typename KeyType, typename BucketItemType, typename Hash, class KeyEqual>
+   template <typename ItemType>
+   typename HashTable<KeyType, BucketItemType, Hash, KeyEqual>::Value_Type&
+   HashTable<KeyType, BucketItemType, Hash, KeyEqual>::Insert(const KeyType& K, ItemType&& Item)
    {
-      return buckets[hash(K)].insert(Item);
+      return buckets[hash(K) % buckets.size()].insert(Item);
    }
 
-   template <typename Key, typename BucketItem, typename Hash, class KeyEqual>
+   template <typename KeyType, typename BucketItemType, typename Hash, class KeyEqual>
    template <class... ItemConstructorParams>
-   BucketItem& HashTable<Key, BucketItem, Hash, KeyEqual>::Emplace(const Key& K, ItemConstructorParams&&... Args)
+   typename HashTable<KeyType, BucketItemType, Hash, KeyEqual>::Value_Type&
+   HashTable<KeyType, BucketItemType, Hash, KeyEqual>::Emplace(const KeyType& K, ItemConstructorParams&&... Args)
    {
-      return buckets[hash(K)].emplace(Args...);
+      return buckets[hash(K) % buckets.size()].emplace_back(K, Args...);
    }
 
    template <typename Key, typename BucketItem, typename Hash, class KeyEqual>

@@ -11,15 +11,17 @@ namespace Graph
    template <typename T>
    struct Node
    {
-      T                    data;
-      std::vector<Edge<T>> edges;
+      T                    Data;
+      std::vector<Edge<T>> Edges;
+
+      void AddEdge
    };
 
    template <typename T>
    struct Edge
    {
-      uint32_t cost;
-      Node<T>* node;
+      uint32_t Cost;
+      Node<T>* Node;
    };
 
    /**

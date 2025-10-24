@@ -6,8 +6,12 @@ TEST_CASE("Test Graph", "[graph]")
 {
    Graph::Graph<int> Graph;
 
-   Graph.InsertNode(Graph::Node{5});
-   Graph.EmplaceNode(5);
+   auto* A{Graph.InsertNode(Graph::Node{5})};
+   auto* B{Graph.EmplaceNode(5)};
+
+   Graph.AddUndirectedEdge(A, B);
 
    REQUIRE(Graph.GetNodes().size() == 2);
+   REQUIRE(A->Edges.size() == 1);
+   REQUIRE(B->Edges.size() == 1);
 }

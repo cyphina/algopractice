@@ -261,8 +261,8 @@ namespace Core
    StaticGrid<T, WIDTH, HEIGHT>& StaticGrid<T, WIDTH, HEIGHT>::operator=(const StaticGrid<E, WIDTH2, HEIGHT2>& Rhs)
    {
       // Note we do overwrite any old values since operator= means we're trying to have something similar to the right not keep anything.
-      StaticGrid<T, WIDTH, HEIGHT> Temp{Rhs}; // Do all work in a temp instance
-      Swap(Temp);                             // Commit work with non-throwing operations.
+      StaticGrid Temp{Rhs}; // Do all work in a temp instance
+      Swap(Temp);           // Commit work with non-throwing operations.
       m_cells.resize(WIDTH * HEIGHT);
       return *this;
    }

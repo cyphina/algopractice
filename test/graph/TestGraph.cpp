@@ -4,7 +4,10 @@
 
 TEST_CASE("Test Graph", "[graph]")
 {
-   std::unique_ptr<Graph::Node<int>> Node{std::make_unique<Graph::Node<int>>(5)};
-
    Graph::Graph<int> Graph;
+
+   Graph.InsertNode(Graph::Node{5});
+   Graph.EmplaceNode(5);
+
+   REQUIRE(Graph.GetNodes().size() == 2);
 }

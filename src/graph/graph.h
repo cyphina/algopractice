@@ -14,7 +14,8 @@ namespace Graph
       T                    Data;
       std::vector<Edge<T>> Edges;
 
-      void AddEdge
+      void AddEdge();
+      void AddDirectedEdge();
    };
 
    template <typename T>
@@ -36,9 +37,9 @@ namespace Graph
 
     public:
       template <typename... Ts>
-      void EmplaceNode(Ts&&... Args);
+      Node<T>* EmplaceNode(Ts&&... Args);
 
-      Node<T>* InsertNode(std::unique_ptr<Node<T>>&& Node);
+      Node<T>* InsertNode(const Node<T>& NewNode);
       void     RemoveNode(const std::unique_ptr<Node<T>>& Node);
 
       const NodeList& GetNodes() const { return nodes; }
@@ -48,9 +49,10 @@ namespace Graph
    };
 
    template <typename T>
-   Node<T>* Graph<T>::InsertNode(std::unique_ptr<Node<T>>&& Node)
+   Node<T>* Graph<T>::InsertNode(const Node<T>& NewNode)
    {
-      return nodes.insert(std::move(Node).get());
+      nodes.push_back(std::move(std::make_unique<Node<T>>(std::move(NewNode))));
+      return nodes.back().get();
    }
 
    template <typename T>
@@ -61,8 +63,10 @@ namespace Graph
 
    template <typename T>
    template <typename... Ts>
-   void Graph<T>::EmplaceNode(Ts&&... Args)
+   Node<T>* Graph<T>::EmplaceNode(Ts&&... Args)
    {
-      nodes.emplace_back(Node(T{Args...}, {}));
+      auto& NewNode{nodes.emplace_back(std::move(std::make_unique<Node<T>>(Node<T>(T{Args...}))))};
+      return NewNode.get();
    }
+
 }

@@ -1,5 +1,7 @@
 #include "booktranslation.h"
 
+#include <unordered_map>
+
 namespace BookTranslation
 {
    std::optional<NodeCost> BookTranslation::FindMinimalCostTranslation(GraphType&       LanguageGraph,

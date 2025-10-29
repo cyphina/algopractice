@@ -7,6 +7,12 @@
 
 namespace Graph
 {
+   enum class EdgeType : uint8_t
+   {
+      Directed,
+      Undirected
+   };
+
    template <typename T>
    struct Edge;
 
@@ -24,6 +30,14 @@ namespace Graph
       std::optional<uint32_t> Cost;
    };
 
+   struct GraphEdgeData
+   {
+      uint16_t                FromIndex{};
+      uint16_t                ToIndex{};
+      std::optional<uint32_t> Cost;
+      EdgeType                Type{EdgeType::Directed};
+   };
+
    /**
     * Keeps the nodes alive as we pass stuff along.
     * And it can provide some functions useful on graphs too.
@@ -36,6 +50,8 @@ namespace Graph
       using NodeList = std::vector<std::unique_ptr<Node<T>>>;
 
     public:
+      Graph(const std::vector<T>&& NodeData, std::vector<GraphEdgeData>&& EdgeData);
+
       template <typename... Ts>
       Node<T>* EmplaceNode(Ts&&... Args);
       Node<T>* InsertNode(const Node<T>& NewNode);
@@ -46,8 +62,6 @@ namespace Graph
       void RemoveNode(const std::unique_ptr<Node<T>>& Node);
 
       const NodeList& GetNodes() const { return nodes; }
-
-      int BFS(Node<T>* StartingNode, Node<T>* TargetNode);
 
     private:
       NodeList nodes;
@@ -77,6 +91,32 @@ namespace Graph
    void Graph<T>::RemoveNode(const std::unique_ptr<Node<T>>& Node)
    {
       nodes.erase(Node);
+   }
+
+   template <typename T>
+   Graph<T>::Graph(const std::vector<T>&& NodeData, std::vector<GraphEdgeData>&& EdgeData)
+   {
+      for(uint32_t i{0}; i < NodeData.size(); ++i)
+      {
+         EmplaceNode(NodeData[i]);
+      }
+
+      const auto& Nodes{GetNodes()};
+
+      for(const auto& [FromIndex, ToIndex, Cost, Type] : EdgeData)
+      {
+         switch(Type)
+         {
+            case EdgeType::Directed:
+            {
+               AddDirectedEdge(Nodes[FromIndex], Nodes[ToIndex], Cost);
+            }
+            case EdgeType::Undirected:
+            {
+               AddUndirectedEdge(Nodes[FromIndex], Nodes[ToIndex], Cost);
+            }
+         }
+      }
    }
 
    template <typename T>

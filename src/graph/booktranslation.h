@@ -1,13 +1,13 @@
 #pragma once
 
-#include "graph.h"
+#include "Graph.h"
 #include <cstdint>
 #include <optional>
 
 namespace BookTranslation
 {
-   using GraphType = Graph::Graph<std::string>;
-   using NodeType  = Graph::Node<std::string>;
+   using GraphType = Graphs::Graph<std::string>;
+   using NodeType  = Graphs::Node<std::string>;
 
    struct NodeCost
    {

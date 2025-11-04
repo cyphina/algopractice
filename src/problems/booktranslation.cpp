@@ -5,7 +5,7 @@
 #include <print>
 #include <string>
 #include <vector>
-#include "graph/graph.h"
+#include "graph/Graphs.h"
 
 int main()
 {
@@ -33,14 +33,14 @@ int main()
 
       std::string               TranslatorLanguage;
       uint32_t                  TranslationCost;
-      Graph::Graph<std::string> Graph;
+      Graphs::Graph<std::string> Graph;
       const auto&               Nodes{Graph.GetNodes()};
 
       for(int NumTranslatorsIndex{0}; NumTranslatorsIndex < NumTranslators; ++NumTranslatorsIndex)
       {
          std::println("Input Source Language, Target Language, then Cost. {}/{}", NumTranslatorsIndex, NumTranslators);
          std::cin >> TranslatorLanguage;
-         Graph::Node<std::string>* Node1{};
+         Graphs::Node<std::string>* Node1{};
 
          if(const auto NodeIt{std::ranges::find_if(Nodes,
                                                    [&TranslatorLanguage](const auto& Node)
@@ -58,7 +58,7 @@ int main()
 
          std::cin >> TranslatorLanguage;
 
-         Graph::Node<std::string>* Node2{};
+         Graphs::Node<std::string>* Node2{};
          if(const auto NodeIt{std::ranges::find_if(Nodes,
                                                    [&TranslatorLanguage](const auto& Node)
                                                    {
@@ -81,7 +81,7 @@ int main()
       // Need explicit return tyep cause it's going to return Node->Data aka a string. Then try to assign it to Nodes but then back inserter
       // overrides operator= to mean insert. It would then try to implicit convert the temp string to a string view and then we get garbo.
       std::ranges::transform(Nodes, std::back_inserter(NodeStrings),
-                             [](const std::unique_ptr<Graph::Node<std::string>>& Node) -> std::string_view
+                             [](const std::unique_ptr<Graphs::Node<std::string>>& Node) -> std::string_view
                              {
                                 return Node->Data;
                              });

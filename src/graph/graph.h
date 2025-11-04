@@ -1,11 +1,14 @@
 #pragma once
 
+#include <assert.h>
 #include <memory>
 #include <optional>
 #include <queue>
+#include <ranges>
+#include <unordered_map>
 #include <vector>
 
-namespace Graph
+namespace Graphs
 {
    enum class EdgeType : uint8_t
    {
@@ -45,11 +48,13 @@ namespace Graph
    template <typename T>
    class Graph
    {
+    public:
+      using NodeType = Node<T>;
       // We'll just use unique pointer and have to invalidate dangling pointers when we remove.
       // If we stored regular nodes our pointers might be invalidated as the vector resizes.
       using NodeList = std::vector<std::unique_ptr<Node<T>>>;
 
-    public:
+      Graph() = default;
       Graph(const std::vector<T>&& NodeData, std::vector<GraphEdgeData>&& EdgeData);
 
       template <typename... Ts>
@@ -109,11 +114,13 @@ namespace Graph
          {
             case EdgeType::Directed:
             {
-               AddDirectedEdge(Nodes[FromIndex], Nodes[ToIndex], Cost);
+               AddDirectedEdge(Nodes[FromIndex].get(), Nodes[ToIndex].get(), Cost);
+               break;
             }
             case EdgeType::Undirected:
             {
-               AddUndirectedEdge(Nodes[FromIndex], Nodes[ToIndex], Cost);
+               AddUndirectedEdge(Nodes[FromIndex].get(), Nodes[ToIndex].get(), Cost);
+               break;
             }
          }
       }

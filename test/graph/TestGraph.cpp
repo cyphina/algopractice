@@ -1,12 +1,11 @@
 #include <catch2/catch_test_macros.hpp>
-#include <memory>
 #include "graph/graph.h"
 
 TEST_CASE("Test Graph", "[graph]")
 {
-   Graph::Graph<int> Graph;
+   Graphs::Graph<int> Graph;
 
-   auto* A{Graph.InsertNode(Graph::Node{5})};
+   auto* A{Graph.InsertNode(Graphs::Node{5})};
    auto* B{Graph.EmplaceNode(5)};
 
    Graph.AddUndirectedEdge(A, B);

@@ -1,6 +1,33 @@
 #include "micemaze.h"
 #include "graph.h"
 #include <numeric>
+#include <ranges>
+
+namespace
+{
+   using NodeToMinTimeMap = std::unordered_map<MiceMaze::GraphType::NodeType*, uint32_t>;
+   using PriorityQueue    = std::priority_queue<MiceMaze::DijkstraNodeData, std::vector<MiceMaze::DijkstraNodeData>,
+                                                std::greater<MiceMaze::DijkstraNodeData>>;
+
+   void Relax(const MiceMaze::GraphType& Graph, NodeToMinTimeMap& MinTimeMap,
+              MiceMaze::GraphType::NodeType* NodeToVisit, PriorityQueue& MinTimePriority)
+   {
+      const auto CurrentCellNodeCost{MinTimeMap[NodeToVisit]};
+
+      for(const auto& Edge : NodeToVisit->Edges)
+      {
+         if(Edge.Cost)
+         {
+            const auto PathCost{CurrentCellNodeCost + Edge.Cost.value()};
+            if(PathCost < MinTimeMap[Edge.Node])
+            {
+               MinTimeMap[Edge.Node] = PathCost;
+               MinTimePriority.emplace(Edge.Node, PathCost);
+            }
+         }
+      }
+   }
+}
 
 namespace MiceMaze
 {
@@ -9,24 +36,90 @@ namespace MiceMaze
       const auto CostCompare{CurrentMinCost <=> OtherNode.CurrentMinCost};
       if(CostCompare == std::strong_ordering::equal)
       {
-         return GraphNodeIndex <=> OtherNode.GraphNodeIndex;
+         return Node <=> OtherNode.Node;
       }
       return CostCompare;
    }
 
    bool DijkstraNodeData::operator==(const DijkstraNodeData& OtherNode) const
    {
-      return GraphNodeIndex == OtherNode.GraphNodeIndex;
+      return Node == OtherNode.Node;
    }
 
-   int MiceMaze(uint16_t NumCellsInMaze, uint16_t ExitCellIndex, uint16_t ExitTime,
-                std::vector<Graph::GraphEdgeData>&& EdgeData)
+   std::vector<DijkstraNodeData> MiceMaze(uint16_t NumCellsInMaze, uint16_t ExitCellIndex, uint16_t ExitTime,
+                                          const GraphType& ReverseGraph)
    {
-      std::vector<int> NodeData;
-      std::ranges::iota(NodeData, NumCellsInMaze);
-      Graph::Graph Graph{std::move(NodeData), std::move(EdgeData)};
+      if(ExitCellIndex >= NumCellsInMaze)
+      {
+         return {};
+      }
 
-      std::priority_queue<DijkstraNodeData> RelaxData;
+      const auto& GraphNodes{ReverseGraph.GetNodes()};
+
+      if(GraphNodes.size() == 0)
+      {
+         return {};
+      }
+
+      // Since we can't like update nodes via relaxing from the priority queue the plan is to maintian the optimal distances in a map
+      // Ordinarily you use a vector where
+      // Index is the index of the node (nodes should be stable for the run).
+      // Value is the actual optimal distance.
+      // But since we use node pointers we need a map.
+      NodeToMinTimeMap NodesToMinTime;
+      NodesToMinTime.reserve(NumCellsInMaze);
+
+      const auto Indices      = std::views::repeat(std::numeric_limits<uint32_t>::max(), NumCellsInMaze);
+      const auto NodePointers = GraphNodes | std::views::transform(
+                                                 [](const auto& Node)
+                                                 {
+                                                    return Node.get();
+                                                 });
+      const auto ZippedIndicesToNodePointers = std::views::zip(NodePointers, Indices);
+#if __cpp_lib_containers_ranges
+      NodesToMinTime.insert_range(ZippedIndicesToNodePointers);
+#elif
+      assert(false);
       return {};
+#endif
+
+      // Exit cell starts at 0;
+      NodesToMinTime[GraphNodes[ExitCellIndex].get()] = 0;
+
+      PriorityQueue PathCostPriority;
+
+      const auto DijkstraNodes{GraphNodes | std::views::transform(
+                                                [&NodesToMinTime](const auto& Node)
+                                                {
+                                                   const auto NodePtr{Node.get()};
+                                                   return DijkstraNodeData(NodePtr, NodesToMinTime[NodePtr]);
+                                                })};
+
+      PathCostPriority.push_range(DijkstraNodes);
+
+      for(int i{0}; i < NumCellsInMaze; ++i)
+      {
+         DijkstraNodeData MinPriority{PathCostPriority.top()};
+         PathCostPriority.pop();
+
+         while(MinPriority.CurrentMinCost != NodesToMinTime[MinPriority.Node])
+         {
+            MinPriority = PathCostPriority.top();
+            PathCostPriority.pop();
+         }
+
+         Relax(ReverseGraph, NodesToMinTime, MinPriority.Node, PathCostPriority);
+      }
+
+      std::vector<DijkstraNodeData> Result;
+      for(const auto [Node, Cost] : NodesToMinTime)
+      {
+         if(Cost <= ExitTime)
+         {
+            Result.emplace_back(Node, Cost);
+         }
+      }
+
+      return Result;
    }
 }

@@ -56,7 +56,7 @@ namespace MiceMaze
 
       const auto& GraphNodes{ReverseGraph.GetNodes()};
 
-      if(GraphNodes.size() == 0)
+      if(GraphNodes.empty())
       {
          return {};
       }
@@ -69,7 +69,9 @@ namespace MiceMaze
       NodeToMinTimeMap NodesToMinTime;
       NodesToMinTime.reserve(NumCellsInMaze);
 
-      const auto Indices      = std::views::repeat(std::numeric_limits<uint32_t>::max(), NumCellsInMaze);
+      static constexpr uint32_t Sentinel{std::numeric_limits<uint32_t>::max()};
+
+      const auto Indices      = std::views::repeat(Sentinel, NumCellsInMaze);
       const auto NodePointers = GraphNodes | std::views::transform(
                                                  [](const auto& Node)
                                                  {
@@ -102,6 +104,12 @@ namespace MiceMaze
          DijkstraNodeData MinPriority{PathCostPriority.top()};
          PathCostPriority.pop();
 
+         if(MinPriority.CurrentMinCost == Sentinel)
+         {
+            // Detached graph
+            break;
+         }
+
          while(MinPriority.CurrentMinCost != NodesToMinTime[MinPriority.Node])
          {
             MinPriority = PathCostPriority.top();
@@ -114,7 +122,8 @@ namespace MiceMaze
       std::vector<DijkstraNodeData> Result;
       for(const auto [Node, Cost] : NodesToMinTime)
       {
-         if(Cost <= ExitTime)
+         // Prevent including exit node
+         if(Cost != 0 && Cost <= ExitTime)
          {
             Result.emplace_back(Node, Cost);
          }

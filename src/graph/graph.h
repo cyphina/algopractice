@@ -41,6 +41,16 @@ namespace Graphs
       EdgeType                Type{EdgeType::Directed};
    };
 
+   // 1 byte since every object has a unique address if you ever take its pointer
+   // Compiler typically optimizes it away. Decision for what function is called during overload resolution happens during compilation.
+   // The tag disambiguiates it so the generated machine code knows to bind the call to some address but it's not even used so the optimizer knows
+   // it's just for disambiguiating.
+   struct ReverseGraphTag_T
+   {
+   };
+
+   inline constexpr ReverseGraphTag_T ReverseGraphTag{};
+
    /**
     * Keeps the nodes alive as we pass stuff along.
     * And it can provide some functions useful on graphs too.
@@ -56,6 +66,7 @@ namespace Graphs
 
       Graph() = default;
       Graph(const std::vector<T>&& NodeData, std::vector<GraphEdgeData>&& EdgeData);
+      Graph(const std::vector<T>&& NodeData, std::vector<GraphEdgeData>&& EdgeData, ReverseGraphTag_T Tag);
 
       template <typename... Ts>
       Node<T>* EmplaceNode(Ts&&... Args);
@@ -109,6 +120,34 @@ namespace Graphs
       const auto& Nodes{GetNodes()};
 
       for(const auto& [FromIndex, ToIndex, Cost, Type] : EdgeData)
+      {
+         switch(Type)
+         {
+            case EdgeType::Directed:
+            {
+               AddDirectedEdge(Nodes[FromIndex].get(), Nodes[ToIndex].get(), Cost);
+               break;
+            }
+            case EdgeType::Undirected:
+            {
+               AddUndirectedEdge(Nodes[FromIndex].get(), Nodes[ToIndex].get(), Cost);
+               break;
+            }
+         }
+      }
+   }
+
+   template <typename T>
+   Graph<T>::Graph(const std::vector<T>&& NodeData, std::vector<GraphEdgeData>&& EdgeData, ReverseGraphTag_T Tag)
+   {
+      for(uint32_t i{0}; i < NodeData.size(); ++i)
+      {
+         EmplaceNode(NodeData[i]);
+      }
+
+      const auto& Nodes{GetNodes()};
+
+      for(const auto& [ToIndex, FromIndex, Cost, Type] : EdgeData)
       {
          switch(Type)
          {

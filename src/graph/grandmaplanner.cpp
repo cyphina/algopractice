@@ -24,7 +24,12 @@ namespace
 
    auto GrandmaPlannerPriority::operator<=>(const GrandmaPlannerPriority& OtherCookieStateMinTime) const
    {
-      return MinTime <=> OtherCookieStateMinTime.MinTime;
+      const auto MinTimeCompare{MinTime <=> OtherCookieStateMinTime.MinTime};
+      if(MinTimeCompare == std::strong_ordering::equal)
+      {
+         return State <=> OtherCookieStateMinTime.State;
+      }
+      return MinTimeCompare;
    }
 
    struct GrandmaPlannerMinRecord

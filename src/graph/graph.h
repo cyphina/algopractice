@@ -1,12 +1,11 @@
 #pragma once
 
-#include <assert.h>
 #include <memory>
 #include <optional>
 #include <queue>
-#include <ranges>
-#include <unordered_map>
 #include <vector>
+#include "core/DebugUtils.h"
+#include "core/Grid.h"
 
 namespace Graphs
 {
@@ -65,8 +64,10 @@ namespace Graphs
       using NodeList = std::vector<std::unique_ptr<Node<T>>>;
 
       Graph() = default;
-      Graph(const std::vector<T>&& NodeData, std::vector<GraphEdgeData>&& EdgeData);
-      Graph(const std::vector<T>&& NodeData, std::vector<GraphEdgeData>&& EdgeData, ReverseGraphTag_T Tag);
+      Graph(std::vector<T>&& NodeData, std::vector<GraphEdgeData>&& EdgeData);
+      Graph(std::vector<T>&& NodeData, std::vector<GraphEdgeData>&& EdgeData, ReverseGraphTag_T Tag);
+      /** Create a complete graph */
+      Graph(const std::vector<T>&& NodeData, Core::Grid<T>&& AdjacencyMatrix);
 
       template <typename... Ts>
       Node<T>* EmplaceNode(Ts&&... Args);
@@ -110,7 +111,7 @@ namespace Graphs
    }
 
    template <typename T>
-   Graph<T>::Graph(const std::vector<T>&& NodeData, std::vector<GraphEdgeData>&& EdgeData)
+   Graph<T>::Graph(std::vector<T>&& NodeData, std::vector<GraphEdgeData>&& EdgeData)
    {
       for(uint32_t i{0}; i < NodeData.size(); ++i)
       {
@@ -138,7 +139,7 @@ namespace Graphs
    }
 
    template <typename T>
-   Graph<T>::Graph(const std::vector<T>&& NodeData, std::vector<GraphEdgeData>&& EdgeData, ReverseGraphTag_T Tag)
+   Graph<T>::Graph(std::vector<T>&& NodeData, std::vector<GraphEdgeData>&& EdgeData, ReverseGraphTag_T Tag)
    {
       for(uint32_t i{0}; i < NodeData.size(); ++i)
       {
@@ -160,6 +161,29 @@ namespace Graphs
             {
                AddUndirectedEdge(Nodes[FromIndex].get(), Nodes[ToIndex].get(), Cost);
                break;
+            }
+         }
+      }
+   }
+
+   template <typename T>
+   Graph<T>::Graph(const std::vector<T>&& NodeData, Core::Grid<T>&& AdjacencyMatrix)
+   {
+      if(ensure(NodeData.size() == AdjacencyMatrix.GetHeight() && NodeData.size() == AdjacencyMatrix.GetWidth()))
+      {
+         for(uint32_t i{0}; i < NodeData.size(); ++i)
+         {
+            EmplaceNode(NodeData[i]);
+         }
+
+         for(int i{0}; i < AdjacencyMatrix.GetWidth(); ++i)
+         {
+            for(int j{i}; j < AdjacencyMatrix.GetHeight(); ++j)
+            {
+               if(i != j)
+               {
+                  AddUndirectedEdge(nodes[i].get(), nodes[j].get(), AdjacencyMatrix[i, j]);
+               }
             }
          }
       }

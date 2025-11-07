@@ -5,6 +5,7 @@
 
 namespace MiceMaze
 {
+   // The int is just to mark each node
    using GraphType = Graphs::Graph<int>;
 
    struct DijkstraNodeData

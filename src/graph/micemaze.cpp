@@ -2,6 +2,7 @@
 #include "graph.h"
 #include <numeric>
 #include <ranges>
+#include <unordered_map>
 
 namespace
 {
@@ -88,7 +89,7 @@ namespace MiceMaze
       // Exit cell starts at 0;
       NodesToMinTime[GraphNodes[ExitCellIndex].get()] = 0;
 
-      PriorityQueue PathCostPriority;
+      PriorityQueue Priorities;
 
       const auto DijkstraNodes{GraphNodes | std::views::transform(
                                                 [&NodesToMinTime](const auto& Node)
@@ -97,26 +98,27 @@ namespace MiceMaze
                                                    return DijkstraNodeData(NodePtr, NodesToMinTime[NodePtr]);
                                                 })};
 
-      PathCostPriority.push_range(DijkstraNodes);
+      Priorities.push_range(DijkstraNodes);
 
       for(int i{0}; i < NumCellsInMaze; ++i)
       {
-         DijkstraNodeData MinPriority{PathCostPriority.top()};
-         PathCostPriority.pop();
+         DijkstraNodeData MinPriority{Priorities.top()};
+         Priorities.pop();
 
          if(MinPriority.CurrentMinCost == Sentinel)
          {
-            // Detached graph
+            // Rest of the graph is detached.
             break;
          }
 
+         // Since the priority node is prefiled we can pass stale priority values
          while(MinPriority.CurrentMinCost != NodesToMinTime[MinPriority.Node])
          {
-            MinPriority = PathCostPriority.top();
-            PathCostPriority.pop();
+            MinPriority = Priorities.top();
+            Priorities.pop();
          }
 
-         Relax(ReverseGraph, NodesToMinTime, MinPriority.Node, PathCostPriority);
+         Relax(ReverseGraph, NodesToMinTime, MinPriority.Node, Priorities);
       }
 
       std::vector<DijkstraNodeData> Result;

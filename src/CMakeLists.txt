@@ -1,4 +1,5 @@
 file(GLOB_RECURSE ALGO_SOURCES CONFIGURE_DEPENDS
+    binarysearch/*.cpp
     graph/*.cpp
     sorting/*.cpp
     divideAndConquer/*.cpp
@@ -9,6 +10,7 @@ file(GLOB_RECURSE ALGO_SOURCES CONFIGURE_DEPENDS
 )
 
 file(GLOB_RECURSE ALGO_HEADERS CONFIGURE_DEPENDS
+    binarysearch/*.h
     graph/*.h
     sorting/*.h
     divideAndConquer/*.h

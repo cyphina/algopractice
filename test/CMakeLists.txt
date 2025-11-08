@@ -3,6 +3,7 @@ FetchContent_Declare(Catch2 GIT_REPOSITORY https://github.com/catchorg/Catch2.gi
 FetchContent_MakeAvailable(Catch2)
 
 file(GLOB_RECURSE ALGO_SOURCES CONFIGURE_DEPENDS
+    binarysearch/*.cpp
     core/*.cpp
     cppFeatures/*.cpp
     divideAndConquer/*.cpp

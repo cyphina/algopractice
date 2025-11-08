@@ -14,7 +14,8 @@ namespace
 
 int main()
 {
-   std::println("Descendant Distance - Score is how many descendants a family member has at distance d (d edges below).");
+   std::println(
+       "Descendant Distance - Score is how many descendants a family member has at distance d (d edges below).");
    std::println("Print num inputs.");
 
    size_t NumInputs{0};
@@ -87,11 +88,12 @@ int main()
             DescendantDistances.emplace_back(Node.get(), DescendantDistance);
          }
 
-         std::ranges::sort(DescendantDistances,
-                           [](const DescendantDistanceType& DescendantDistanceA, const DescendantDistanceType& DescendantDistanceB)
-                           {
-                              return DescendantDistanceA.second > DescendantDistanceB.second;
-                           });
+         std::ranges::sort(
+             DescendantDistances,
+             [](const DescendantDistanceType& DescendantDistanceA, const DescendantDistanceType& DescendantDistanceB)
+             {
+                return DescendantDistanceA.second > DescendantDistanceB.second;
+             });
 
          int ThirdHighestScore{0};
          if(DescendantDistances.size() > 2)

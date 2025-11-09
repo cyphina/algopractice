@@ -20,28 +20,32 @@ namespace NaryTree
       [[nodiscard]] bool operator==(const T& rhs) const;
    };
 
-   template <typename T>
+   template <typename T, typename EdgeDataT>
    struct NodeWithEdge;
 
-   template <typename T>
+   template <typename NodeDataType, typename EdgeDataT>
    struct Edge
    {
-      NodeWithEdge<T>*        Node{nullptr};
-      std::optional<uint32_t> Cost;
+      NodeWithEdge<NodeDataType, EdgeDataT>* Node{nullptr};
+      std::optional<EdgeDataT>               Data;
    };
 
-   template <typename T>
+   template <typename T, typename EdgeDataT>
    struct NodeWithEdge
    {
-      T                    data;
-      std::vector<Edge<T>> children;
+      using EdgeType = Edge<T, EdgeDataT>;
+
+      NodeWithEdge(const T& Data);
+
+      T                     data;
+      std::vector<EdgeType> children;
 
       size_t        GetNumChildren() const { return children.size(); }
       NodeWithEdge* GetChildAt(uint32_t Index) { return children[Index].Node; }
 
-      [[nodiscard]] auto operator<=>(const NodeWithEdge& rhs) const;
-      [[nodiscard]] bool operator==(const NodeWithEdge& rhs) const;
-      [[nodiscard]] bool operator==(const T& rhs) const;
+      [[nodiscard]] auto operator<=>(const NodeWithEdge& Rhs) const;
+      [[nodiscard]] bool operator==(const NodeWithEdge& Rhs) const;
+      [[nodiscard]] bool operator==(const T& Rhs) const;
    };
 
    template <typename T, typename NodeT>
@@ -79,7 +83,8 @@ namespace NaryTree
    {
     public:
       using NodeType = std::unique_ptr<NodeT>;
-      using NodeList = std::unordered_set<NodeType, NodeHash<T, NodeT>, NodeEqual<T, NodeT>>;
+      //using NodeList = std::unordered_set<NodeType, NodeHash<T, NodeT>, NodeEqual<T, NodeT>>;
+      using NodeList = std::vector<NodeType>;
 
       // Use unique pointers to keep pointers valid for the tree even after the underlying data structure reallocates.
       NodeT*          AddNode(const T& Data);
@@ -115,29 +120,35 @@ namespace NaryTree
       return data == rhs;
    }
 
-   template <typename T>
-   auto NodeWithEdge<T>::operator<=>(const NodeWithEdge& rhs) const
+   template <typename T, typename EdgeDataT>
+   NodeWithEdge<T, EdgeDataT>::NodeWithEdge(const T& Data)
    {
-      return data <=> rhs.data;
+      data = Data;
    }
 
-   template <typename T>
-   bool NodeWithEdge<T>::operator==(const NodeWithEdge& rhs) const
+   template <typename T, typename EdgeDataT>
+   auto NodeWithEdge<T, EdgeDataT>::operator<=>(const NodeWithEdge& Rhs) const
    {
-      return data == rhs.data;
+      return data <=> Rhs.data;
    }
 
-   template <typename T>
-   bool NodeWithEdge<T>::operator==(const T& rhs) const
+   template <typename T, typename EdgeDataT>
+   bool NodeWithEdge<T, EdgeDataT>::operator==(const NodeWithEdge& Rhs) const
    {
-      return data == rhs;
+      return data == Rhs.data;
+   }
+
+   template <typename T, typename EdgeDataT>
+   bool NodeWithEdge<T, EdgeDataT>::operator==(const T& Rhs) const
+   {
+      return data == Rhs;
    }
 
    template <typename T, typename NodeT>
    NodeT* NaryTree<T, NodeT>::AddNode(const T& Data)
    {
-      const auto Result{nodes.emplace(std::make_unique<NodeT>(Data))};
-      return Result.second ? Result.first->get() : nullptr;
+      const auto& Result{nodes.emplace_back(std::make_unique<NodeT>(Data))};
+      return Result ? Result.get() : nullptr;
    }
 
    template <typename T, typename NodeT>

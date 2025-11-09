@@ -20,5 +20,4 @@ namespace DivideAndConquer
     * Linear time approach
     */
    SubarrayResult FindMaximumSubarrayKadane(const std::vector<int>& A);
-
 }

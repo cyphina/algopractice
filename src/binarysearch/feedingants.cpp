@@ -6,7 +6,7 @@
 
 namespace
 {
-   bool TestLiquidAmount(const FeedingAnts::NodeType& Node, uint32_t AmountOfLiquid)
+   bool TestLiquidAmount(const FeedingAnts::NodeType& Node, float AmountOfLiquid)
    {
       if(Node.children.empty())
       {
@@ -44,23 +44,24 @@ namespace
    }
 }
 
-float FeedingAnts::FeedingAntsProblem(std::vector<TerrariumEdge>&& Pipes,
-                                      std::vector<NodeDataType>&&  RequiredLiquidForAnts)
+std::optional<float> FeedingAnts::FeedingAntsProblem(std::vector<TerrariumEdge>&& Pipes,
+                                                     std::vector<NodeDataType>&&  RequiredLiquidForAnts)
 {
    TreeType Tree;
 
    if(RequiredLiquidForAnts.empty())
    {
-      return 0;
+      return 0.f;
    }
 
    if(ensure(Pipes.size() == RequiredLiquidForAnts.size() - 1))
    {
       for(const auto& RequiredLiquid : RequiredLiquidForAnts)
       {
+         const auto AddedNode{Tree.AddNode(RequiredLiquid)};
          if(RequiredLiquid.has_value())
          {
-            Tree.AddNode(RequiredLiquid);
+            AddedNode->data = RequiredLiquid.value();
          }
       }
 
@@ -77,7 +78,7 @@ float FeedingAnts::FeedingAntsProblem(std::vector<TerrariumEdge>&& Pipes,
       float High{2'000'000'000};
       float Mid{(Low + High) / 2};
 
-      while(!MathUtil::NearlyEqualAbs(Low, High))
+      while(!MathUtil::NearlyEqualAbs(Low, High, 1e-04))
       {
          const auto bEnoughLiquid{TestLiquidAmount(Tree, Mid)};
          if(bEnoughLiquid)
@@ -95,7 +96,7 @@ float FeedingAnts::FeedingAntsProblem(std::vector<TerrariumEdge>&& Pipes,
       return High;
    }
 
-   return -1.f;
+   return {};
 }
 
 bool FeedingAnts::TestLiquidAmount(const TreeType& Tree, uint32_t InitialAmountOfLiquid)

@@ -36,6 +36,9 @@ namespace FeedingAnts
     * describe how water propagates throughout the tree.
     *
     * Each ant requires at least 1 liter of water.
+    *
+    * @param Pipes - All the children of some node should have a percentage adding up to 1. It's not checked
     */
-   float FeedingAntsProblem(std::vector<TerrariumEdge>&& Pipes, std::vector<NodeDataType>&& RequiredLiquidForAnt);
+   std::optional<float> FeedingAntsProblem(std::vector<TerrariumEdge>&& Pipes,
+                                           std::vector<NodeDataType>&&  RequiredLiquidForAnt);
 }

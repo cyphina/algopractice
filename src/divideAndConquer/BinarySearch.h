@@ -19,27 +19,35 @@ namespace DivideAndConquer
       int lo = 0;
       int hi = A.size();
 
-      // Last == in <= is narrowed down to the final target. We need it or the only way we'd work is if our narrowing of lo and high had somehow led us to a mid with a matching value.
-      // The < is the real stopping condition. We get there after processing the final target.
-      while(lo < hi)
+      // At each step we have an invariant.
+      // Finding the optimal value involves a costly scan through the array without binary search.
+      // Optimality is hard to find but feasibility (check whether A[i] <= V) is
+      // easy to check (it's technically std::lower_bound aka find first element not less than V).
+      // By nature of the array being sorted we have feasible and infeasible solutions partitioned.
+
+      // lo is part of the feasible. hi should always be part of the unfeasible.
+      while(lo + 1 < hi)
       {
          int mid = (lo + hi) / 2; // integral division will already floor.
          // For each of these we already checked mid in the else case so we can adjust the index by 1.
          // Also if we don't do this we can get restuck just setting it to mid for cases where mid is the same value.
-         // We see this mostly in small subarrays where mid either equals low or hi, and then we set low or hi to mid which keeps it the same...
+         // We see this mostly in small subarrays where mid either equals low or hi, and then we set low or hi to mid which keeps it the same..
 
-         if(V > A[mid])
+         // feasible so now lo is it
+         if(A[mid] <= V)
          {
-            lo = mid + 1;
+            lo = mid;
          }
-         else if(V < A[mid])
+         // no feasible so hi is it
+         else if(A[mid] > V)
          {
             hi = mid;
          }
-         else
-         {
-            return mid;
-         }
+      }
+
+      if(A[lo] == V)
+      {
+         return lo;
       }
 
       return -1;

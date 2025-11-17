@@ -11,6 +11,7 @@ file(GLOB_RECURSE ALGO_SOURCES CONFIGURE_DEPENDS
     memoization/*.cpp
     misc/*.cpp
     sorting/*.cpp
+    stl/*.cpp
     tree/*.cpp
 )
 

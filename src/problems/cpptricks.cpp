@@ -1,5 +1,6 @@
 #include <iostream>
 #include <iterator>
+#include <map>
 #include <mdspan>
 #include <print>
 #include <vector>
@@ -33,7 +34,7 @@ void ReverseIteratorTest()
 }
 
 template <typename T>
-void print3Dmdspan(const T& mdSpan)
+void Print3Dmdspan(const T& mdSpan)
 {
    for(size_t i{0}; i < mdSpan.extents().extent(0); ++i)
    {
@@ -57,7 +58,88 @@ void TestMdSpan()
    //std::mdspan<int, std::extents<int, 2, 8>, std::layout_stride> data2D{data.data(), 2, 4};
 
    std::mdspan<int, std::extents<std::size_t, 4, 3, 2>> Data3D{Data.data(), 4, 3, 2};
-   print3Dmdspan(Data3D);
+   Print3Dmdspan(Data3D);
+}
+
+struct TestCopyVsAssign
+{
+   TestCopyVsAssign() {}
+
+   TestCopyVsAssign(std::string_view Data) : data{Data} {}
+
+   TestCopyVsAssign(const TestCopyVsAssign& Other) : data(Other.data) { std::println("Copy Construct"); }
+
+   TestCopyVsAssign(TestCopyVsAssign&& Other) noexcept : data(Other.data) { std::println("Move Construct"); }
+
+   TestCopyVsAssign& operator=(const TestCopyVsAssign& Other)
+   {
+      std::println("Copy Assign");
+
+      if(this == &Other)
+      {
+         return *this;
+      }
+      data = Other.data;
+      return *this;
+   }
+
+   TestCopyVsAssign& operator=(TestCopyVsAssign&& Other) noexcept
+   {
+      std::println("Move Assign");
+
+      if(this == &Other)
+      {
+         return *this;
+      }
+
+      data = Other.data;
+      return *this;
+   }
+
+   [[nodiscard]] bool operator==(const TestCopyVsAssign& Other) const  = default;
+   [[nodiscard]] auto operator<=>(const TestCopyVsAssign& Other) const = default;
+
+   std::string data;
+};
+
+void InsertMapAndPrint()
+{
+   using namespace std::literals;
+
+   std::map<TestCopyVsAssign, int> DataMap{{"wee"sv, 2}, {"pee"sv, 3}, {"dee"sv, 5}};
+   if(auto Ret{DataMap.insert({"wee"sv, 33})}; Ret.second)
+   {
+      std::println("Insert {} succeeded", Ret.first->second);
+   }
+
+   // Needs default constructor for this!
+   DataMap["zee"sv] = 39;
+
+   // Ok
+   for(auto& [key, data] : DataMap)
+   {
+      std::println("{} {}", key.data, data);
+   }
+
+   // Ok
+   for(const auto& [key, data] : DataMap)
+   {
+      std::println("{} {}", key.data, data);
+   }
+
+   std::println("Extra Copies!!!");
+
+   // Copying!!!
+   // ReSharper disable once CppRangeBasedForIncompatibleReference
+   for(const std::pair<TestCopyVsAssign, int>& elem : DataMap)
+   {
+      std::println("{} {}", elem.first.data, elem.second);
+   }
+
+   auto Start{DataMap.begin()};
+   std::advance(Start, 2);
+   DataMap.erase(Start, DataMap.end());
+   std::println("Size: {}", DataMap.size());
 }
 
 int main()
@@ -73,4 +155,5 @@ int main()
    ReverseIteratorTest();
    CleanupVectorMemory(Values);
    TestMdSpan();
+   InsertMapAndPrint();
 }

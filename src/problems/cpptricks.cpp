@@ -2,13 +2,15 @@
 #include <array>
 #include <iostream>
 #include <iterator>
+#include <list>
 #include <map>
 #include <mdspan>
-#include <list>
 #include <numeric>
 #include <print>
 #include <ranges>
+#include <source_location>
 #include <vector>
+#include "core/TestUtils.h"
 
 void CleanupVectorMemory(std::vector<int>& V)
 {
@@ -67,52 +69,11 @@ void TestMdSpan()
    Print3Dmdspan(Data3D);
 }
 
-struct TestCopyVsAssign
-{
-   TestCopyVsAssign() {}
-
-   TestCopyVsAssign(std::string_view Data) : data{Data} {}
-
-   TestCopyVsAssign(const TestCopyVsAssign& Other) : data(Other.data) { std::println("Copy Construct"); }
-
-   TestCopyVsAssign(TestCopyVsAssign&& Other) noexcept : data(Other.data) { std::println("Move Construct"); }
-
-   TestCopyVsAssign& operator=(const TestCopyVsAssign& Other)
-   {
-      std::println("Copy Assign");
-
-      if(this == &Other)
-      {
-         return *this;
-      }
-      data = Other.data;
-      return *this;
-   }
-
-   TestCopyVsAssign& operator=(TestCopyVsAssign&& Other) noexcept
-   {
-      std::println("Move Assign");
-
-      if(this == &Other)
-      {
-         return *this;
-      }
-
-      data = Other.data;
-      return *this;
-   }
-
-   [[nodiscard]] bool operator==(const TestCopyVsAssign& Other) const  = default;
-   [[nodiscard]] auto operator<=>(const TestCopyVsAssign& Other) const = default;
-
-   std::string data;
-};
-
 void InsertMapAndPrint()
 {
    using namespace std::literals;
 
-   std::map<TestCopyVsAssign, int> DataMap{{"wee"sv, 2}, {"pee"sv, 3}, {"dee"sv, 5}};
+   std::map<TestUtils::TestCopyVsAssign, int> DataMap{{"wee"sv, 2}, {"pee"sv, 3}, {"dee"sv, 5}};
    if(auto Ret{DataMap.insert({"wee"sv, 33})}; Ret.second)
    {
       std::println("Insert {} succeeded", Ret.first->second);
@@ -137,7 +98,7 @@ void InsertMapAndPrint()
 
    // Copying!!!
    // ReSharper disable once CppRangeBasedForIncompatibleReference
-   for(const std::pair<TestCopyVsAssign, int>& elem : DataMap)
+   for(const std::pair<TestUtils::TestCopyVsAssign, int>& elem : DataMap)
    {
       std::println("{} {}", elem.first.data, elem.second);
    }
@@ -181,10 +142,62 @@ void EraseIf()
 
 void Splice()
 {
-   std::list<std::string> dictionary{"aardvark", "cat"};
-   std::list<std::string> newWords{"baby", "bomb"};
-   dictionary.splice(++std::cbegin(dictionary), newWords);
-   std::println("{}", dictionary);
+   std::list<std::string> Dictionary{"aardvark", "cat"};
+   std::list<std::string> NewWords{"baby", "bomb"};
+   Dictionary.splice(++std::cbegin(Dictionary), NewWords);
+   std::println("{}", Dictionary);
+}
+
+double SafeDivide(double Num, double Den)
+{
+   if(Den == 0)
+   {
+      throw std::invalid_argument{"Divide By Zero!"};
+   }
+   return Num / Den;
+}
+
+void TestException()
+{
+   try
+   {
+      std::println("{}", SafeDivide(5, 2));
+      std::println("{}", SafeDivide(10, 0));
+   }
+   catch(const std::invalid_argument& E)
+   {
+      std::println("Caught exceptionm: {}", E.what());
+   }
+
+   std::println("Yo Momma");
+}
+
+class please_terminate_me : public std::bad_alloc
+{
+};
+
+void MyNewHandler()
+{
+   std::println(std::cerr, "Unable to allocate memory.");
+   throw please_terminate_me{};
+}
+
+void TestMemoryExceptionHandler()
+{
+   try
+   {
+      std::new_handler OldHandler{std::set_new_handler(MyNewHandler)};
+      size_t           NumInts{std::numeric_limits<size_t>::max()};
+      int*             Ptr{new int[NumInts]};
+      std::set_new_handler(OldHandler);
+   }
+   catch(const please_terminate_me& E)
+   {
+      auto Location{std::source_location::current()};
+      std::println(std::cerr, "{}({}): Unable to allocate memory: {}", Location.file_name(), Location.line(), E.what());
+      std::println("Terminating Program!");
+      return;
+   }
 }
 
 int main()
@@ -204,4 +217,6 @@ int main()
    Splice();
    TestMdSpan();
    InsertMapAndPrint();
+   TestException();
+   TestMemoryExceptionHandler();
 }

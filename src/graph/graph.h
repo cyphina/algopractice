@@ -59,8 +59,7 @@ namespace Graphs
    {
     public:
       using NodeType = Node<T>;
-      // We'll just use unique pointer and have to invalidate dangling pointers when we remove.
-      // If we stored regular nodes our pointers might be invalidated as the vector resizes.
+      // We'll just use unique pointer and have to invalidate dangling pointers when we remove or if the vec resizes.
       using NodeList = std::vector<std::unique_ptr<Node<T>>>;
 
       Graph() = default;

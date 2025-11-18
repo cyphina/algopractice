@@ -1,4 +1,5 @@
 #pragma once
+#include <cassert>
 
 #if defined(_MSC_VER)
 #   define debug_break() __debugbreak()
@@ -16,3 +17,9 @@
 #else
 #   define ensure(cond) (cond)
 #endif
+
+#define PRE_RETURN(cond, retval) \
+   if(!ensure(cond))             \
+   {                             \
+      return retval;             \
+   }

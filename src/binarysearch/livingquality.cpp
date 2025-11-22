@@ -2,6 +2,16 @@
 #include <algorithm>
 #include <ranges>
 
+namespace
+{
+   /** Checks to see if a rectangle on the grid is feasible, aka if it's median is less than the threshold */
+   bool TestRectanglesFeasible(const Core::Grid<uint32_t>& CityQualityRankings, uint32_t RectWidth, uint32_t RectHeight,
+                               uint32_t MedianThresholdGuess)
+   {
+      return false;
+   }
+}
+
 namespace LivingQuality
 {
    uint32_t CalculateMinimumMedianRectangle(const Core::Grid<uint32_t>& CityQualityRankings, uint32_t RectWidth,
@@ -57,5 +67,30 @@ namespace LivingQuality
       }
 
       return BestMinimumMedian;
+   }
+
+   uint32_t FindMinimumMedianRectangleInCity(const Core::Grid<uint32_t>& CityQualityRankings, uint32_t RectWidth,
+                                             uint32_t RectHeight)
+   {
+      uint32_t Low{0};
+      uint32_t High{RectHeight * RectWidth};
+      // This is a case where we framed the problem as High defining the reasonable range and Low defining the unreasonable range
+      // Our guess is, are all the rectangles median's <= Mid? If so then the feasible.
+      // Thus the low end is unfeasible. Since median is surely not <= 0.
+      while(High - 1 > Low)
+      {
+         uint32_t Mid{(Low + High) / 2};
+
+         if(TestRectanglesFeasible(CityQualityRankings, RectWidth, RectHeight, Mid))
+         {
+            High = Mid;
+         }
+         else
+         {
+            Low = Mid;
+         }
+      }
+
+      return High;
    }
 }

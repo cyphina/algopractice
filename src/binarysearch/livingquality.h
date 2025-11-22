@@ -10,6 +10,9 @@ namespace LivingQuality
     * "median quality rank".
     * @return 
     */
-   uint32_t MinimumMedianRectangle(const Core::Grid<uint32_t>& CityQualityRankings, uint32_t RectWidth,
-                                   uint32_t RectHeight);
+   uint32_t FindMinimumMedianRectangleInCityBrute(const Core::Grid<uint32_t>& CityQualityRankings, uint32_t RectWidth,
+                                             uint32_t RectHeight);
+
+   uint32_t CalculateMinimumMedianRectangle(const Core::Grid<uint32_t>& CityQualityRankings, uint32_t RectWidth,
+                                            uint32_t RectHeight, Core::GridCoordinate RectangleTopLeft);
 }

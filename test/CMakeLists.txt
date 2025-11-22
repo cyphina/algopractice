@@ -4,6 +4,7 @@ FetchContent_MakeAvailable(Catch2)
 
 file(GLOB_RECURSE ALGO_SOURCES CONFIGURE_DEPENDS
     binarysearch/*.cpp
+    datamanip/*.cpp
     core/*.cpp
     cppFeatures/*.cpp
     divideAndConquer/*.cpp

@@ -38,6 +38,7 @@ namespace Core
 
       std::optional<T>&       At(std::size_t Row, std::size_t Column);
       const std::optional<T>& At(std::size_t Row, std::size_t Column) const;
+      const std::optional<T>& At(const GridCoordinate& Coordinate) const;
 
       std::size_t GetHeight() const { return m_height; }
       std::size_t GetWidth() const { return m_width; }
@@ -101,6 +102,13 @@ namespace Core
    {
       VerifyCoordinate(Row, Column);
       return m_cells[Row * m_width + Column];
+   }
+
+   template <typename T>
+   const std::optional<T>& Grid<T>::At(const GridCoordinate& Coordinate) const
+   {
+      VerifyCoordinate(Coordinate.Row, Coordinate.Column);
+      return m_cells[Coordinate.Row * m_width + Coordinate.Column];
    }
 
    template <typename T>

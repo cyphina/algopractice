@@ -26,4 +26,23 @@ TEST_CASE("Test Living Quality", "[binarysearch]")
       const auto MinimumMedianRectangle{LivingQuality::FindMinimumMedianRectangleInCityBrute(Grid, 5, 3)};
       CHECK(MinimumMedianRectangle == 13);
    }
+
+   SECTION("Test Feasibility")
+   {
+      const auto Feasibility{LivingQuality::TestRectanglesFeasibleSlow(Grid, 5, 3, 15)};
+      CHECK(Feasibility);
+      const auto Feasibility2{LivingQuality::TestRectanglesFeasibleSlow(Grid, 5, 3, 50)};
+      CHECK(Feasibility2);
+      const auto Feasibility3{LivingQuality::TestRectanglesFeasibleSlow(Grid, 5, 3, 5)};
+      CHECK(!Feasibility3);
+   }
+
+   SECTION("Test Minimum Median Rectangle Calculator Binary Search")
+   {
+      const auto MinimumMedianRectangle{LivingQuality::FindMinimumMedianRectangleInCityFeasibleSlow(Grid, 5, 3)};
+      CHECK(MinimumMedianRectangle == 13);
+
+      const auto MinimumMedianRectangleFast{LivingQuality::FindMinimumMedianRectangleInCityFeasible(Grid, 5, 3)};
+      CHECK(MinimumMedianRectangleFast == 13);
+   }
 }

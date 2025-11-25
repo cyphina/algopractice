@@ -1,4 +1,5 @@
-﻿#include <print>
+﻿#include <functional>
+#include <print>
 
 class Unit
 {
@@ -53,7 +54,31 @@ void PointerToMemberExample()
    std::println("{}", Hero::mana);
 }
 
+class MoveOnlyFunctor
+{
+ public:
+   explicit MoveOnlyFunctor(std::unique_ptr<Hero> Hero) : hero{std::move(Hero)} {}
+   void operator()(int Param) const noexcept
+   {
+      if(hero)
+      {
+         std::println("Wee {} {}", Param, hero->health);
+      }
+   }
+
+ private:
+   std::unique_ptr<Hero> hero;
+};
+
+void MoveOnlyFunctionExample()
+{
+   MoveOnlyFunctor                                   M{std::make_unique<Hero>()};
+   std::move_only_function<void(int) const noexcept> MoveOnlyFunction{std::move(M)};
+   MoveOnlyFunction(200);
+}
+
 int main()
 {
    PointerToMemberExample();
+   MoveOnlyFunctionExample();
 }

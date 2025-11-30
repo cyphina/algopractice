@@ -43,3 +43,4 @@ target_include_directories(sut PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 
 # use after we defined sut
 add_subdirectory(problems)
+add_subdirectory(examples)

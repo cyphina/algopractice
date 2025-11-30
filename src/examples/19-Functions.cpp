@@ -2,6 +2,7 @@
 #include <functional>
 #include <print>
 #include <span>
+#include <string>
 
 namespace
 {
@@ -122,10 +123,42 @@ namespace
    }
 }
 
+template <typename T>
+concept Addable = requires(T a, T b) {
+   { a + b } -> std::convertible_to<T>;
+};
+
+void TestEverythingLambda()
+{
+   struct Widget
+   {
+      int         Value;
+      std::string Name;
+   };
+
+   int    SomeNumber{42};
+   Widget MyWidget{100, "MyWidget"};
+
+   auto my_lambda = [SomeNumber, &MyWidget]<typename T>
+      requires Addable<T>
+   [[nodiscard]] (T x) /* static */ mutable noexcept(noexcept(x + x)) -> T
+   {
+      SomeNumber += 10;
+      MyWidget.Value = 999;
+
+      auto Result = x + x;
+      return Result;
+   };
+
+   int Result = my_lambda(5);
+   std::println("Everything Lambda Result - {}", Result);
+}
+
 int main()
 {
    PointerToMemberExample();
    FunctorWithStaticCallOperatorExample();
    STLFunctorExample();
    MoveOnlyFunctionExample();
+   TestEverythingLambda();
 }

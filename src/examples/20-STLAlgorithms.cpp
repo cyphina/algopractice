@@ -1,6 +1,9 @@
 #include <algorithm>
+#include <execution>
 #include <functional>
 #include <print>
+#include <ranges>
+#include "core/DebugUtils.h"
 
 class Add
 {
@@ -46,7 +49,7 @@ void TestCallbackCopying()
    std::println("Callback Size {}", sizeof(MutableCallback));
 
    std::vector<int> Vec{5, 10, 12, 7, 8};
-   if(auto It{std::ranges::find_if(std::as_const(Vec), MutableCallback)}; It != Vec.end())
+   if(const auto It{std::ranges::find_if(std::as_const(Vec), MutableCallback)}; It != Vec.end())
    {
       std::println("{}", *It);
    }
@@ -55,7 +58,7 @@ void TestCallbackCopying()
    MutableCallback(6);
 
    std::println("Using std::ref!");
-   if(auto It{std::ranges::find_if(std::as_const(Vec), std::ref(MutableCallback))}; It != Vec.end())
+   if(const auto It{std::ranges::find_if(std::as_const(Vec), std::ref(MutableCallback))}; It != Vec.end())
    {
       std::println("{}", *It);
    }
@@ -101,6 +104,46 @@ void TestUniformContainerErasure()
    std::println("{}", V);
 }
 
+void TestParallelAlgorithms()
+{
+   std::vector Data(1'000'000, 1);
+
+   {
+      Profiling::ScopedTimer ScopedTimer;
+
+      // Sequential
+      std::for_each(std::execution::seq, Data.begin(), Data.end(),
+                    [](int& x)
+                    {
+                       x *= 2;
+                    });
+   }
+
+   {
+      Profiling::ScopedTimer ScopedTimer;
+
+      // Parallel (multi-threaded)
+      std::for_each(std::execution::par, Data.begin(), Data.end(),
+                    [](int& x)
+                    {
+                       x *= 2;
+                    });
+   }
+
+   {
+      Profiling::ScopedTimer ScopedTimer;
+
+      // Parallel + Vectorized
+      std::for_each(std::execution::par_unseq, Data.begin(), Data.end(),
+                    [](int& x)
+                    {
+                       x *= 2;
+                    });
+   }
+
+   std::println("{}", Data | std::ranges::views::take(20));
+}
+
 int main()
 {
    TestStaticFunctor();
@@ -108,4 +151,5 @@ int main()
    TestSearchSubsequenceForPattern();
    TestLexicographicalCompare();
    TestUniformContainerErasure();
+   TestParallelAlgorithms();
 }

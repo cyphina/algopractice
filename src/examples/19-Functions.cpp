@@ -6,6 +6,27 @@
 
 namespace
 {
+   template <std::predicate<int, int> MatcherT, std::invocable<int, int> MatchHandlerT>
+   void FindMatches(std::span<const int> Values1, std::span<const int> Values2, MatcherT Matcher, MatchHandlerT Handler)
+   {
+   }
+
+   void TestMatches()
+   {
+      std::vector Values1{2, 5, 6, 9, 10, 1, 1};
+      std::vector Values2{4, 4, 2, 9, 0, 3, 1};
+
+      FindMatches(
+          Values1, Values2,
+          [](int Value1, int Value2) static
+          {
+             return Value1 == Value2;
+          },
+          [](int Value1, int Value2) static
+          {
+             std::println("Match {} {}", Value1, Value2);
+          });
+   }
 
    class Unit
    {
@@ -156,6 +177,7 @@ void TestEverythingLambda()
 
 int main()
 {
+   TestMatches();
    PointerToMemberExample();
    FunctorWithStaticCallOperatorExample();
    STLFunctorExample();

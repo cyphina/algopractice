@@ -25,7 +25,10 @@
    }
 
 #include <chrono>
+#include <concepts>
 #include <print>
+#include <random>
+#include <ranges>
 
 namespace Profiling
 {
@@ -43,4 +46,22 @@ namespace Profiling
 
       std::chrono::high_resolution_clock::time_point startTime;
    };
+}
+
+namespace Test
+{
+   /**
+    * Fills up a vector with elements [0, N) shuffled. 
+    */
+   template <std::integral T>
+   std::vector<T> RandomFillIntVec(int Size)
+   {
+      std::vector<T>             Values{std::from_range, std::views::iota(0, Size)};
+      std::random_device         Seeder;
+      std::default_random_engine Generator{Seeder()};
+
+      std::ranges::shuffle(Values, Generator);
+
+      return Values;
+   }
 }

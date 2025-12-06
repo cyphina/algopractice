@@ -14,6 +14,7 @@ file(GLOB_RECURSE ALGO_SOURCES CONFIGURE_DEPENDS
     sorting/*.cpp
     stl/*.cpp
     tree/*.cpp
+    dsAccelerators/*.cpp
 )
 
 # Generate Visual Studio filters based on folder structure

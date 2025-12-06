@@ -12,53 +12,64 @@ namespace Heap
    concept HeapComparator = std::totally_ordered<T> && std::predicate<Comp, T, T>;
 
    /**
-    * @tparam T - Type we can compare using a HeapComparator
-    * @tparam C - The comparison used to check if one element has lower priority than another. By default this leads to a min heap. 
+    * @tparam DataT - Type we can compare using a HeapComparator
+    * @tparam ComparatorT - The comparison used to check if one element has lower priority than another. By default this leads to a min heap. 
     */
-   template <std::totally_ordered T, HeapComparator<T> C = std::greater<>>
+   template <std::totally_ordered DataT, HeapComparator<DataT> ComparatorT = std::greater<>>
    class HeapWithSTL
    {
     public:
-      explicit HeapWithSTL(std::vector<T>&& Data);
-      T                     ExtractTop();
-      void                  Insert(T Elem);
-      void                  PrintData();
-      const std::vector<T>& GetData() const { return data; }
-      bool                  IsEmpty() const { return data.empty(); }
-      size_t                Size() const { return data.size(); }
+      HeapWithSTL() = default;
+      explicit HeapWithSTL(std::vector<DataT>& Data);
+      explicit HeapWithSTL(std::vector<DataT>&& Data);
 
-      std::vector<T> data;
+      DataT                     ExtractTop();
+      void                      Insert(DataT Elem);
+      void                      PrintData();
+      const std::vector<DataT>& GetData() const { return data; }
+      bool                      IsEmpty() const { return data.empty(); }
+      size_t                    Size() const { return data.size(); }
+
+      std::vector<DataT> data;
    };
 
    /**
-    * @tparam T - Type we can compare using a HeapComparator
-    * @tparam C - The comparison used to check if one element has lower priority than another. By default this leads to a min heap. 
+    * @tparam DataT - Type we can compare using a HeapComparator
+    * @tparam ComparatorT - The comparison used to check if one element has lower priority than another. By default this leads to a min heap. 
     */
-   template <std::totally_ordered T, HeapComparator<T> C = std::greater<>>
+   template <std::totally_ordered DataT, HeapComparator<DataT> ComparatorT = std::greater<>>
    class Heap
    {
     public:
-      explicit Heap(std::vector<T>&& Data);
-      T                     ExtractTop();
-      void                  Insert(T Elem);
-      void                  PrintData();
-      const std::vector<T>& GetData() const { return data; }
-      bool                  IsEmpty() const { return data.empty(); }
-      size_t                Size() const { return data.size(); }
+      Heap() = default;
+      explicit Heap(std::vector<DataT>&& Data);
+
+      DataT                     ExtractTop();
+      void                      Insert(DataT Elem);
+      void                      PrintData();
+      const std::vector<DataT>& GetData() const { return data; }
+      bool                      IsEmpty() const { return data.empty(); }
+      size_t                    Size() const { return data.size(); }
 
     private:
       static size_t GetParentIndex(size_t NodeIndex) { return (NodeIndex - 1) / 2; }
       static size_t GetLeftChildIndex(size_t NodeIndex) { return 2 * NodeIndex + 1; }
       static size_t GetRightChildIndex(size_t NodeIndex) { return 2 * NodeIndex + 2; }
 
-      C              comparator;
-      std::vector<T> data;
+      ComparatorT        comparator;
+      std::vector<DataT> data;
    };
 
-   template <std::totally_ordered T, HeapComparator<T> C>
-   HeapWithSTL<T, C>::HeapWithSTL(std::vector<T>&& Data) : data{std::move(Data)}
+   template <std::totally_ordered DataT, HeapComparator<DataT> ComparatorT>
+   HeapWithSTL<DataT, ComparatorT>::HeapWithSTL(std::vector<DataT>& Data) : data{Data}
    {
-      std::ranges::make_heap(data, C{});
+      std::ranges::make_heap(data, ComparatorT{});
+   }
+
+   template <std::totally_ordered DataT, HeapComparator<DataT> ComparatorT>
+   HeapWithSTL<DataT, ComparatorT>::HeapWithSTL(std::vector<DataT>&& Data) : data{std::move(Data)}
+   {
+      std::ranges::make_heap(data, ComparatorT{});
    }
 
    template <std::totally_ordered T, HeapComparator<T> C>
@@ -103,10 +114,11 @@ namespace Heap
          size_t HigherPriorityIndex;
 
          bool ValidLeftChild{LeftChildIndex < data.size()};
-         bool ValidRightChild{RightChildIndex < data.size()};
 
-         while(ValidLeftChild || ValidRightChild)
+         // Don't need to check right child - if there's no left theres' no right since have a complete binary tree.
+         while(ValidLeftChild)
          {
+            bool ValidRightChild{RightChildIndex < data.size()};
             if(!ValidRightChild)
             {
                HigherPriorityIndex = LeftChildIndex;

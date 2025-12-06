@@ -8,6 +8,7 @@ file(GLOB_RECURSE ALGO_SOURCES CONFIGURE_DEPENDS
     misc/*.cpp
     tree/*.cpp
     memoization/*.cpp
+    dsAccelerators/*.cpp
 )
 
 file(GLOB_RECURSE ALGO_HEADERS CONFIGURE_DEPENDS
@@ -20,6 +21,7 @@ file(GLOB_RECURSE ALGO_HEADERS CONFIGURE_DEPENDS
     misc/*.h
     tree/*.h
     memoization/*.h
+    dsAccelerators/*.h
 )
 
 # Combine all source files

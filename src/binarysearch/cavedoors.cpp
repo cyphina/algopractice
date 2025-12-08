@@ -1,6 +1,7 @@
 #include "cavedoors.h"
 
 #include <optional>
+#include <utility>
 #include <vector>
 #include "core/DebugUtils.h"
 
@@ -12,7 +13,7 @@ namespace
    int TryCombination(const std::vector<uint32_t>& TestSwitchPositions,
                       const std::vector<uint32_t>& ActualSwitchPositions)
    {
-      if(ensure(TestSwitchPositions.size()) == ActualSwitchPositions.size())
+      if(ensure(TestSwitchPositions.size() == ActualSwitchPositions.size()))
       {
          for(size_t i{0}; i < TestSwitchPositions.size(); ++i)
          {
@@ -76,7 +77,7 @@ void CaveDoors::ExploreCaveStepBinary(uint32_t NumSwitches, const std::vector<ui
       }
 
       // Make sure to set it in such a way that it starts off as closed
-      if(TryCombination(SwitchPositions, ActualSwitchPositions) != SwitchIndex)
+      if(std::cmp_not_equal(TryCombination(SwitchPositions, ActualSwitchPositions), SwitchIndex))
       {
          for(size_t i{0}; i < NumSwitches; ++i)
          {

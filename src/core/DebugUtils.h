@@ -64,4 +64,24 @@ namespace Test
 
       return Values;
    }
+
+   template <std::ranges::input_range RangeT>
+   void PrintRange(RangeT Range)
+   {
+      std::print("[");
+
+      auto It{Range.begin()};
+
+      if(!Range.empty())
+      {
+         std::print("{}" << *It);
+         ++It;
+      }
+      for(; It != Range.end(); ++It)
+      {
+         std::print(", {}", *It);
+      }
+      std::print("]");
+   }
+
 }

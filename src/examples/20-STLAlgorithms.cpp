@@ -95,6 +95,71 @@ namespace
       }
    }
 
+   void TestModifyingSequence()
+   {
+      std::vector<int> Values(10);
+      int              Index{};
+      std::ranges::generate(Values,
+                            [&Index]
+                            {
+                               ++Index;
+                               return Index;
+                            });
+      std::println("Generate - {}", Values);
+
+      std::ranges::transform(Values, Values.begin(),
+                             [](const int& SourceValue)
+                             {
+                                return SourceValue + 24;
+                             });
+
+      std::println("Transform - {}", Values);
+
+      std::vector<int> Values2(std::from_range, std::views::iota(5, 20));
+      std::ranges::transform(Values, Values2, Values2.begin(),
+                             [](const int& SourceValue, const int& DestinationValue)
+                             {
+                                return SourceValue + DestinationValue;
+                             });
+      std::println("Transform Binary - {}", Values2);
+   }
+
+   void TestBinarySearch()
+   {
+      std::vector<int> Values{2, 4, 3, 9, 3, 1'000, 55, 24, 78};
+      std::ranges::sort(Values);
+
+      auto Iter{std::ranges::lower_bound(Values, 10)};
+      Values.insert(Iter, 10);
+
+      auto Iter2{std::ranges::lower_bound(Values, 1'203)};
+      Values.insert(Iter2, 1'203);
+
+      std::println("Sorted Vector Add - {}", Values);
+   }
+
+   void TestScanAlgorithms()
+   {
+      std::vector<int> Data{1, 2, 3, 4};
+      std::vector<int> Dest(4);
+      std::inclusive_scan(Data.begin(), Data.end(), Dest.begin());
+      std::println("Inclusive Scan - {}", Dest);
+      std::exclusive_scan(Data.begin(), Data.end(), Dest.begin(), 0);
+      std::println("Exclusive Scan - {}", Dest);
+
+      struct TestStruct
+      {
+         int data{};
+      };
+      std::vector<TestStruct> NewData{{1}, {2}, {3}, {4}};
+      std::transform_inclusive_scan(NewData.begin(), NewData.end(), Dest.begin(), std::plus<>{},
+                                    [](const TestStruct& Elem)
+                                    {
+                                       return Elem.data * 2;
+                                    });
+      std::println("Inclusive Transform Scan - {}", Dest);
+   }
+
    void TestUniformContainerErasure()
    {
       std::vector<int> V{1, 2, 3, 4, 5, 6};
@@ -164,5 +229,8 @@ int main()
    TestLexicographicalCompare();
    TestUniformContainerErasure();
    TestParallelAlgorithms();
+   TestModifyingSequence();
    TestSorting();
+   TestBinarySearch();
+   TestScanAlgorithms();
 }

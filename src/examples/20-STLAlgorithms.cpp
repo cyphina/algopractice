@@ -6,7 +6,6 @@
 
 namespace
 {
-
    class Add
    {
     public:
@@ -38,8 +37,9 @@ namespace
    }
 
    /**
- * Might be a good idea to pass callbacks via std::ref to STL algorithms to prevent them from being copied:
- */
+    * Might be a good idea to pass callbacks via std::ref to STL algorithms to prevent them from being copied.
+    * If they're large enough for it to matter.
+    */
    void TestCallbackCopying()
    {
       auto MutableCallback{[Count = 0](int i) mutable
@@ -67,6 +67,37 @@ namespace
 
       std::println("Original Callback Is Incremented");
       MutableCallback(8);
+   }
+
+   void TestFindAlgorithms()
+   {
+      std::vector<int> Data{0, 2, 4, 10, 20};
+      std::vector<int> ThingsToFind{-3, -5, -10, -20};
+
+      const auto Pred{[](int A, int B)
+                      {
+                         return std::abs(A) == std::abs(B);
+                      }};
+
+      const auto ResultIter{std::ranges::find_first_of(Data, ThingsToFind, Pred)};
+
+      if(ResultIter != Data.end())
+      {
+         std::println("Find First Of - {}", *ResultIter);
+      }
+
+      const auto SubsequenceToMatch{ThingsToFind | std::views::drop(2)};
+
+      const auto ResultRng{std::ranges::find_end(Data, SubsequenceToMatch, Pred)};
+      const auto ResultIt2{
+          std::find_end(Data.begin(), Data.end(), SubsequenceToMatch.begin(), SubsequenceToMatch.end(), Pred)};
+
+      std::println("Find End - {}", ResultRng);
+      std::println("Find End (It Version) - {}", std::ranges::subrange(ResultIt2, Data.end()));
+
+      constexpr std::string_view TestSequence{"1001011010001"};
+      constexpr auto             ResultRng2{std::ranges::search_n(TestSequence, 3, '0')};
+      std::println("Search N - First Sequence of 3 0s {}", ResultRng2);
    }
 
    void TestLexicographicalCompare()
@@ -225,6 +256,7 @@ int main()
 {
    TestStaticFunctor();
    TestCallbackCopying();
+   TestFindAlgorithms();
    TestSearchSubsequenceForPattern();
    TestLexicographicalCompare();
    TestUniformContainerErasure();

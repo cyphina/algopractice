@@ -95,7 +95,7 @@ namespace MiceMaze
                                                 [&NodesToMinTime](const auto& Node)
                                                 {
                                                    const auto NodePtr{Node.get()};
-                                                   return DijkstraNodeData(NodePtr, NodesToMinTime[NodePtr]);
+                                                   return DijkstraNodeData{NodePtr, NodesToMinTime[NodePtr]};
                                                 })};
 
       Priorities.push_range(DijkstraNodes);
@@ -111,7 +111,7 @@ namespace MiceMaze
             break;
          }
 
-         // Since the priority node is prefiled we can pass stale priority values
+         // Since the priority node is prefilled we can pass stale priority values
          while(MinPriority.CurrentMinCost != NodesToMinTime[MinPriority.Node])
          {
             MinPriority = Priorities.top();

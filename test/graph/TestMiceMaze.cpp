@@ -46,7 +46,21 @@ TEST_CASE("MiceMaze", "[graph]")
    EdgeData.emplace_back(3, 2, 7);
 
    auto                NodeData3 = std::views::iota(0u, 4u) | std::ranges::to<std::vector<int>>();
-   MiceMaze::GraphType Graph3{std::move(NodeData2), std::move(EdgeData), Graphs::ReverseGraphTag};
+   MiceMaze::GraphType Graph3{std::move(NodeData3), std::move(EdgeData), Graphs::ReverseGraphTag};
    const auto          Result3{MiceMaze::MiceMaze(4, 0, 30, Graph3)};
    CHECK(Result3.size() == 3);
+}
+
+TEST_CASE("MiceMaze", "[disjoint graph]")
+{
+   std::vector<Graphs::GraphEdgeData> EdgeData;
+   EdgeData.emplace_back(1, 0, 6);
+   EdgeData.emplace_back(2, 1, 3);
+   EdgeData.emplace_back(3, 2, 7);
+
+   auto                NodeData = std::views::iota(0u, 5u) | std::ranges::to<std::vector<int>>();
+   MiceMaze::GraphType Graph{std::move(NodeData), std::move(EdgeData), Graphs::ReverseGraphTag};
+   const auto          Result{MiceMaze::MiceMaze(5, 4, 20, Graph)};
+   // We exclude the exit node... technically there's a rat there.
+   CHECK(Result.empty());
 }

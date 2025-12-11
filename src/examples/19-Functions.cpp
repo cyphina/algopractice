@@ -96,14 +96,14 @@ namespace
       std::println("{}", Hero::mana);
    }
 
-   template <std::input_iterator Iter, std::copy_constructible StartValue,
-             std::invocable<const StartValue&, const StartValue&> Operation>
-   auto AccumulateData(Iter begin, Iter end, const StartValue& startValue, Operation op)
+   template <std::input_iterator Iter, std::copy_constructible StartValueT,
+             std::invocable<const StartValueT&, const StartValueT&> Operation>
+   auto AccumulateData(Iter Begin, Iter End, const StartValueT& StartValue, Operation Op)
    {
-      auto Accumulated{startValue};
-      for(Iter iter{begin}; iter != end; ++iter)
+      auto Accumulated{StartValue};
+      for(Iter iter{Begin}; iter != End; ++iter)
       {
-         Accumulated = op(Accumulated, *iter);
+         Accumulated = Op(Accumulated, *iter);
       }
       return Accumulated;
    }

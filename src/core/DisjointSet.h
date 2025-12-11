@@ -52,26 +52,28 @@ namespace DisjointSet
    template <DisjointSetKey Key>
    std::optional<Key> DisjointSet<Key>::FindRepresentative(const Key& Id)
    {
-      if(const auto It{Data.find(Id)}; It != Data.end())
+      if(const auto IdNodeIt{Data.find(Id)}; IdNodeIt != Data.end())
       {
-         auto CurrentKey{It->second.Parent};
-         auto ParentNode{Data.at(It->second.Parent)};
+         auto  CurrentKey{Id};
+         auto& CurrentKeyNode{Data.at(CurrentKey)};
 
-         while(ParentNode.Parent != CurrentKey)
+         while(CurrentKeyNode.Parent != CurrentKey)
          {
-            CurrentKey = ParentNode.Parent;
-            ParentNode = Data.at(CurrentKey);
+            CurrentKey     = CurrentKeyNode.Parent;
+            CurrentKeyNode = Data.at(CurrentKey);
          }
 
-         const auto& Representative{ParentNode};
+         const auto& Representative{CurrentKeyNode};
 
          // Path compression
-         CurrentKey = It->second.Parent;
-         while(ParentNode.Parent != Representative.Parent)
+         CurrentKey     = Id;
+         CurrentKeyNode = Data.at(CurrentKey);
+
+         while(CurrentKeyNode.Parent != Representative.Parent)
          {
-            ParentNode        = Data.at(CurrentKey);
-            CurrentKey        = ParentNode.Parent;
-            ParentNode.Parent = Representative.Parent;
+            CurrentKeyNode.Parent = Representative.Parent;
+            CurrentKey            = CurrentKeyNode.Parent;
+            CurrentKeyNode        = Data.at(CurrentKey);
          }
 
          return Representative.Parent;
@@ -121,7 +123,7 @@ namespace DisjointSet
    bool DisjointSet<Key>::Same(const Key& A, const Key& B)
    {
       const auto AKey{FindRepresentative(A)};
-      const auto BKey{FindRepresentative(A)};
+      const auto BKey{FindRepresentative(B)};
 
       if(AKey.has_value() && BKey.has_value())
       {

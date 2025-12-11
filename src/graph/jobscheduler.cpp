@@ -66,6 +66,7 @@ namespace JobScheduler
          for(const auto& DependencyNode : JobNode->Dependants)
          {
             auto& DependencyNodeDegree{JobToInDegrees.at(DependencyNode)};
+
             --DependencyNodeDegree;
 
             if(DependencyNodeDegree == 0)

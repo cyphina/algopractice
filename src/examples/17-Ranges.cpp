@@ -1,9 +1,16 @@
+#include <iterator>
 #include <print>
 #include <ranges>
 #include <vector>
-
 namespace
 {
+   void TestIterator()
+   {
+      std::vector<int> V{3, 1, 4};
+      std::println("Iterator Distance - {} {}", std::distance(V.begin() + 1, V.end()),
+                   std::distance(V.end() - 1, V.begin()));
+   }
+
    void TestSubrange()
    {
       std::vector<int> V{1, 2, 3, 4, 5};
@@ -16,5 +23,6 @@ namespace
 
 int main()
 {
+   TestIterator();
    TestSubrange();
 }

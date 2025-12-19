@@ -31,7 +31,6 @@ namespace
       GenerateTreapStringRecursive(TreapNodes, HighestPriorityNodeIndex + 1, R, OStream);
       OStream << ")";
    }
-
 }
 
 namespace BuildingTreaps
@@ -49,14 +48,6 @@ namespace BuildingTreaps
 
    std::string GenerateTreapStringSlow(std::vector<TreapNode>& TreapNodes)
    {
-      /*1. Find root with highest priority.
-2. Split remaining nodes with smaller labels and larger labels to left and right.
-3. Output a open parenthesis.
-4. Do 1 and 2 recursively.
-5. Output the treap values for smaller labels
-6. Output root node of the treap.
-7. Output the treap for larger labels.
-8. Output a close parenthesis.*/
       std::ranges::sort(TreapNodes);
       std::ostringstream OutStream;
 

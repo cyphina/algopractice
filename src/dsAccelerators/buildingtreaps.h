@@ -15,6 +15,6 @@ namespace BuildingTreaps
    };
 
    // Prints (<left_subtreap><L><right_subtreap>)
-   std::string GenerateTreapString(std::vector<TreapNode>& TreapNodes);
+   std::string GenerateTreapStringSlow(std::vector<TreapNode>& TreapNodes);
 
 }

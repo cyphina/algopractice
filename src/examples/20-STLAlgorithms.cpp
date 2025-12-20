@@ -143,8 +143,16 @@ namespace
                              {
                                 return SourceValue + 24;
                              });
-
       std::println("Transform - {}", Values);
+
+      // Needs to be as large as the original since it will overwrite elements
+      std::vector<int> Dest(Values.size());
+      std::ranges::transform(Values, Dest.begin(),
+                             [](const int& SourceValue)
+                             {
+                                return SourceValue + 24;
+                             });
+      std::println("Dest - {}", Values);
 
       std::vector<int> Values2(std::from_range, std::views::iota(5, 20));
       std::ranges::transform(Values, Values2, Values2.begin(),

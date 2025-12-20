@@ -42,7 +42,7 @@ namespace SegmentTree
        */
       SegmentTree(const std::vector<DataT>& Values);
 
-      DataT Query(std::size_t LeftIndex, std::size_t RightIndex);
+      std::optional<DataT> Query(std::size_t LeftIndex, std::size_t RightIndex) const;
 
       const std::vector<SegmentTreeNode<DataT>>& GetData() const { return data; }
 
@@ -56,10 +56,12 @@ namespace SegmentTree
                        std::size_t RightIndex);
       void FillSegtree(const std::vector<DataT>& Values, std::size_t NodeIndex);
 
+      std::optional<DataT> Query(std::size_t NodeIndex, std::size_t LeftIndex, std::size_t RightIndex) const;
+
       void Print(std::size_t NodeIndex) const;
 
-      std::vector<std::optional<SegmentTreeNode<DataT>>> data;
-      MergeOp                                            merge;
+      std::vector<SegmentTreeNode<DataT>> data;
+      MergeOp                             merge;
    };
 
    template <typename DataT, Mergeable<DataT> MergeOp>
@@ -67,12 +69,6 @@ namespace SegmentTree
    {
       if(!Values.empty())
       {
-         // This segment tree is stored in a heap-like array and is not a full binary tree.
-         // Some child nodes may be placeholders that do not correspond to any range in the
-         // original array. Such nodes must behave as identity elements so that merging them
-         // does not affect the result, thus we test here that the default constructed value type for elements
-         // act as identity values when merging.
-         assert(merge(DataT{}, Values[0]) == Values[0]);
          // 4x the size of our input for safety to prevent accessing indices outside of our data bounds when recursion. Lets us avoid some size checks.
          data.resize(Values.size() * 4);
          InitSegtree(Values, 0, 0, Values.size());
@@ -81,9 +77,61 @@ namespace SegmentTree
    }
 
    template <typename DataT, Mergeable<DataT> MergeOp>
-   DataT SegmentTree<DataT, MergeOp>::Query(std::size_t LeftIndex, std::size_t RightIndex)
+   std::optional<DataT> SegmentTree<DataT, MergeOp>::Query(std::size_t LeftIndex, std::size_t RightIndex) const
    {
-      return {};
+      if(data.empty())
+      {
+         return {};
+      }
+
+      if(LeftIndex >= RightIndex)
+      {
+         return {};
+      }
+
+      const auto& RootNode{data[0]};
+
+      if(RightIndex > RootNode.Right)
+      {
+         return {};
+      }
+
+      return Query(0, LeftIndex, RightIndex);
+   }
+
+   template <typename DataT, Mergeable<DataT> MergeOp>
+   std::optional<DataT> SegmentTree<DataT, MergeOp>::Query(std::size_t NodeIndex, std::size_t LeftIndex,
+                                                           std::size_t RightIndex) const
+   {
+      // Case 1 - Node's range is not in the query range.
+      // [1,2) [2,3) - Right <= LeftIndex
+      // [2,3) [1 2) - Left >= RightIndex
+      const auto& Node{data[NodeIndex]};
+      if(Node.Left >= RightIndex || Node.Right <= LeftIndex)
+      {
+         return {};
+      }
+
+      // Case 2 - Node's range exactly in query range
+      if(Node.Left >= LeftIndex && Node.Right <= RightIndex)
+      {
+         return Node.Value;
+      }
+
+      // Case 3 - Node's range partially in query range.
+      const auto LeftValue{Query(GetLeftChildIndex(NodeIndex), LeftIndex, RightIndex)};
+      const auto RightValue{Query(GetRightChildIndex(NodeIndex), LeftIndex, RightIndex)};
+
+      if(!LeftValue)
+      {
+         return RightValue;
+      }
+      if(!RightValue)
+      {
+         return LeftValue;
+      }
+
+      return merge(LeftValue.value(), RightValue.value());
    }
 
    template <typename DataT, Mergeable<DataT> MergeOp>
@@ -94,12 +142,12 @@ namespace SegmentTree
          return;
       }
 
-      std::print("[{}", data[0]->Value);
+      std::print("[{}", data[0].Value);
 
       Print(GetLeftChildIndex(0));
       Print(GetRightChildIndex(0));
 
-      std::print("]", data[0]->Value);
+      std::print("]", data[0].Value);
    }
 
    template <typename DataT, Mergeable<DataT> MergeOp>
@@ -107,19 +155,16 @@ namespace SegmentTree
    {
       const auto& Node{data[NodeIndex]};
 
-      if(Node.has_value())
+      if(Node.Left + 1 >= Node.Right)
       {
-         if(Node->Left + 1 >= Node->Right)
-         {
-            std::print(" {}", data[NodeIndex]->Value);
-            return;
-         }
-
-         std::print(" {}", data[NodeIndex]->Value);
-
-         Print(GetLeftChildIndex(NodeIndex));
-         Print(GetRightChildIndex(NodeIndex));
+         std::print(" {}", Node.Value);
+         return;
       }
+
+      std::print(" {}", Node.Value);
+
+      Print(GetLeftChildIndex(NodeIndex));
+      Print(GetRightChildIndex(NodeIndex));
    }
 
    template <typename DataT, Mergeable<DataT> MergeOp>
@@ -130,9 +175,9 @@ namespace SegmentTree
 
       size_t Mid{(LeftIndex + RightIndex) / 2};
 
-      data[NodeIndex]        = SegmentTreeNode<DataT>{};
-      data[NodeIndex]->Left  = LeftIndex;
-      data[NodeIndex]->Right = RightIndex;
+      data[NodeIndex]       = SegmentTreeNode<DataT>{};
+      data[NodeIndex].Left  = LeftIndex;
+      data[NodeIndex].Right = RightIndex;
 
       if(LeftIndex + 1 >= RightIndex)
       {
@@ -151,14 +196,9 @@ namespace SegmentTree
    {
       auto& Node{data[NodeIndex]};
 
-      if(!Node.has_value())
+      if(Node.Left + 1 >= Node.Right)
       {
-         return;
-      }
-
-      if(Node->Left + 1 >= Node->Right)
-      {
-         Node->Value = Values[Node->Left];
+         Node.Value = Values[Node.Left];
       }
       else
       {
@@ -171,7 +211,7 @@ namespace SegmentTree
          const auto& Left{data[LeftChildIndex]};
          const auto& Right{data[RightChildIndex]};
 
-         Node->Value = merge(Left->Value, Right->Value);
+         Node.Value = merge(Left.Value, Right.Value);
       }
    }
 }

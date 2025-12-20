@@ -7,6 +7,9 @@ concept Arithmetic = std::is_arithmetic_v<T>;
 
 namespace DivideAndConquer
 {
+   /**
+    * To remember how this works you need to map this to the idea of a feasibility partitioning binary search problem where the feasibility condition is A[i] <= V.
+    */
    template <typename T>
       requires Arithmetic<T>
    int BinarySearch(const std::vector<T>& A, T V)
@@ -26,6 +29,7 @@ namespace DivideAndConquer
       // By nature of the array being sorted we have feasible and infeasible solutions partitioned.
 
       // lo is part of the feasible. hi should always be part of the unfeasible.
+      // Don't even think about indices just keep this rule in mind, and remember the condition is when the boundaries touch.
       while(lo + 1 < hi)
       {
          int mid = (lo + hi) / 2; // integral division will already floor.
@@ -33,7 +37,7 @@ namespace DivideAndConquer
          // Also if we don't do this we can get restuck just setting it to mid for cases where mid is the same value.
          // We see this mostly in small subarrays where mid either equals low or hi, and then we set low or hi to mid which keeps it the same..
 
-         // feasible so now lo is it
+         // feasible so now lo is it (notice weuse less than or equal to cause this means we're part of the feasible)
          if(A[mid] <= V)
          {
             lo = mid;

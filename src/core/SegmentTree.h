@@ -44,11 +44,14 @@ namespace SegmentTree
 
       std::optional<DataT> Query(std::size_t LeftIndex, std::size_t RightIndex) const;
 
+      void UpdateValue(std::size_t ValueIndex, const DataT& NewValue);
+
       const std::vector<SegmentTreeNode<DataT>>& GetData() const { return data; }
 
       void Print() const;
 
     private:
+      static size_t GetParentIndex(size_t NodeIndex) { return (NodeIndex - 1) / 2; }
       static size_t GetLeftChildIndex(size_t NodeIndex) { return 2 * NodeIndex + 1; }
       static size_t GetRightChildIndex(size_t NodeIndex) { return 2 * NodeIndex + 2; }
 
@@ -97,6 +100,59 @@ namespace SegmentTree
       }
 
       return Query(0, LeftIndex, RightIndex);
+   }
+
+   template <typename DataT, Mergeable<DataT> MergeOp>
+   void SegmentTree<DataT, MergeOp>::UpdateValue(std::size_t ValueIndex, const DataT& NewValue)
+   {
+      if(data.empty())
+      {
+         return;
+      }
+
+      auto Node{data[0]};
+      if(ValueIndex >= Node.Right)
+      {
+         return;
+      }
+
+      if(data.size() == 1)
+      {
+         data[0].Value = NewValue;
+      }
+
+      std::size_t LeftIndex{Node.Left};
+      std::size_t RightIndex{Node.Right};
+      std::size_t NodeIndex{0};
+
+      // Similar to binary search but we're recreating ho we setup the tree.
+      // [0-2) Find 1 - Go Right from Root.
+      std::size_t Mid{};
+      while(LeftIndex + 1 < RightIndex)
+      {
+         Mid = {(LeftIndex + RightIndex) / 2};
+
+         if(ValueIndex < Mid)
+         {
+            RightIndex = Mid;
+            NodeIndex  = GetLeftChildIndex(NodeIndex);
+         }
+         else
+         {
+            LeftIndex = Mid;
+            NodeIndex = GetRightChildIndex(NodeIndex);
+         }
+      }
+
+      data[NodeIndex].Value = NewValue;
+
+      while(NodeIndex != 0)
+      {
+         NodeIndex             = GetParentIndex(NodeIndex);
+         LeftIndex             = GetLeftChildIndex(NodeIndex);
+         RightIndex            = GetRightChildIndex(NodeIndex);
+         data[NodeIndex].Value = merge(data[LeftIndex].Value, data[RightIndex].Value);
+      }
    }
 
    template <typename DataT, Mergeable<DataT> MergeOp>
@@ -173,7 +229,7 @@ namespace SegmentTree
    {
       // We need to avoid NodeIndex.Left = Values.size() for the filling of the seg tree which happens with this logic and half open ranges.
 
-      size_t Mid{(LeftIndex + RightIndex) / 2};
+      std::size_t Mid{(LeftIndex + RightIndex) / 2};
 
       data[NodeIndex]       = SegmentTreeNode<DataT>{};
       data[NodeIndex].Left  = LeftIndex;

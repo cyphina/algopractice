@@ -50,3 +50,22 @@ TEST_CASE("Segment Tree Query", "[segmenttree]")
       CHECK(Query.value() == 58);
    }
 }
+
+TEST_CASE("Segment Tree Update", "[segmenttree]")
+{
+   std::vector<int>                 Data{54, 42, 58, 49, 36, 5, 55, 56, 16, 40, 39};
+   SegmentTree::Mergeable<int> auto X{SegmentTree::MaxMerge<int>()};
+
+   SegmentTree::SegmentTree SegTree{Data};
+
+   SECTION("Basic Updates")
+   {
+      SegTree.UpdateValue(2, 10);
+      const auto Query{SegTree.Query(0, Data.size())};
+      CHECK(Query.value() == 56);
+   }
+
+   SECTION("Fail Updates")
+   {
+   }
+}

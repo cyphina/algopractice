@@ -114,6 +114,7 @@ namespace BuildingTreaps
                                 return TreapNodes.begin() + Index++;
                              });*/
 
+      // Could also use {priority,index} and merge those properly.
       for(auto it = TreapNodes.begin(); it != TreapNodes.end(); ++it)
       {
          SegmentTreeData.push_back(it);

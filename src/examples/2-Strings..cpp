@@ -1,6 +1,15 @@
 #include <print>
 #include <string>
 
+void TestStringLiterals()
+{
+   std::println(R"-(Embedded )" characters)-");
+   // Single line
+   std::println("Yo"
+                "Mom"
+                "Sucks!!!");
+}
+
 void TestStringConstructors()
 {
    const char* TestChars{"Wee!"};
@@ -18,5 +27,6 @@ void TestStringConstructors()
 
 int main()
 {
+   TestStringLiterals();
    TestStringConstructors();
 }

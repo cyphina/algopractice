@@ -5,5 +5,6 @@ set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 include(CTest)
 # generates build outputs to build/bin instead of src
+add_compile_options($<$<AND:$<COMPILE_LANGUAGE:CXX>,$<CXX_COMPILER_ID:MSVC>>:/utf-8>)
 add_subdirectory(src bin)
 add_subdirectory(test)

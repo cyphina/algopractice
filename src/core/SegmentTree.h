@@ -125,7 +125,7 @@ namespace SegmentTree
       std::size_t RightIndex{Node.Right};
       std::size_t NodeIndex{0};
 
-      // Similar to binary search but we're recreating ho we setup the tree.
+      // Similar to binary search but we're recreating how we setup the tree.
       // [0-2) Find 1 - Go Right from Root.
       std::size_t Mid{};
       while(LeftIndex + 1 < RightIndex)
@@ -144,6 +144,7 @@ namespace SegmentTree
          }
       }
 
+      // Walk up and update the tree with the new value by remerging at each parent
       data[NodeIndex].Value = NewValue;
 
       while(NodeIndex != 0)

@@ -28,7 +28,7 @@ namespace DivideAndConquer
       // easy to check (it's technically std::lower_bound aka find first element not less than V).
       // By nature of the array being sorted we have feasible and infeasible solutions partitioned.
 
-      // lo is part of the feasible. hi should always be part of the unfeasible.
+      // lo is part of the feasible. hi should always be part of the unfeasible (technically it's one past)
       // Don't even think about indices just keep this rule in mind, and remember the condition is when the boundaries touch.
       while(lo + 1 < hi)
       {
@@ -54,6 +54,20 @@ namespace DivideAndConquer
          return lo;
       }
 
+      return -1;
+   }
+
+   /**
+    * For this variation we shrink towards a boundary position rather than a candidate index which cuases the
+    * termination goal to change.
+    *
+    * The commonality is that the invariant is the same - Left Side = Predicate True. Right Side = Predicate False
+    */
+   template <typename T>
+      requires Arithmetic<T>
+   int LowerBound(const std::vector<T>& A, T V)
+   {
+      // TODO
       return -1;
    }
 }

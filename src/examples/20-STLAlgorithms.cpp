@@ -172,6 +172,7 @@ namespace
       Values.insert(Iter, 10);
 
       auto Iter2{std::ranges::lower_bound(Values, 1'203)};
+      std::println("Iter 2 is Equal to End? {}", Iter2 == Values.end());
       Values.insert(Iter2, 1'203);
 
       std::println("Sorted Vector Add - {}", Values);

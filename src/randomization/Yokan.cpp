@@ -109,6 +109,8 @@ namespace Yokan
       const float FlavorCountThreshold{PieceSize / 3.0f};
 
       std::optional<uint32_t> FirstFlavorType;
+      std::optional<uint32_t> SecondFlavorType;
+
       for(; CurrentGuessIndex < NUM_GUESSES; ++CurrentGuessIndex)
       {
          const auto GuessIndex{Distribution(Engine)};
@@ -120,6 +122,12 @@ namespace Yokan
          if(GuessCount >= FlavorCountThreshold)
          {
             FirstFlavorType = FlavorType;
+
+            if(GuessCount >= FlavorCountThreshold * 2)
+            {
+               SecondFlavorType = FlavorType;
+            }
+
             break;
          }
       }
@@ -129,29 +137,23 @@ namespace Yokan
          return {};
       }
 
-      std::optional<uint32_t> SecondFlavorType;
-      for(; CurrentGuessIndex < NUM_GUESSES; ++CurrentGuessIndex)
+      if(!SecondFlavorType)
       {
-         const auto GuessIndex{Distribution(Engine)};
-         const auto FlavorType{PieceFlavors[GuessIndex] - 1};
-
-         const auto GuessCount{CountNumFlavoredPiecesInSlab(FlavorIndexLookup, FlavorType, LeftSlabInclusiveIndex,
-                                                            RightSlabExclusiveIndex)};
-
-         if(FirstFlavorType.value() == FlavorType)
+         for(; CurrentGuessIndex < NUM_GUESSES; ++CurrentGuessIndex)
          {
-            if(GuessCount > FlavorCountThreshold * 2)
+            const auto GuessIndex{Distribution(Engine)};
+            const auto FlavorType{PieceFlavors[GuessIndex] - 1};
+
+            const auto GuessCount{CountNumFlavoredPiecesInSlab(FlavorIndexLookup, FlavorType, LeftSlabInclusiveIndex,
+                                                               RightSlabExclusiveIndex)};
+
+            if(FirstFlavorType.value() != FlavorType)
             {
-               SecondFlavorType = FlavorType;
-               break;
-            }
-         }
-         else
-         {
-            if(GuessCount >= FlavorCountThreshold)
-            {
-               SecondFlavorType = FlavorType;
-               break;
+               if(GuessCount >= FlavorCountThreshold)
+               {
+                  SecondFlavorType = FlavorType;
+                  break;
+               }
             }
          }
       }
@@ -161,6 +163,7 @@ namespace Yokan
          return YokanResult{{FirstFlavorType.value(), -1}, YokanQueryResult::NO};
       }
 
-      return YokanResult{{FirstFlavorType.value(), SecondFlavorType.value()}, YokanQueryResult::YES};
+      return YokanResult{.ValidFlavorIndices = {FirstFlavorType.value(), SecondFlavorType.value()},
+                         .queryResult        = YokanQueryResult::YES};
    }
 }

@@ -70,13 +70,18 @@ namespace LivingQuality
    size_t FindMinimumMedianRectangleInCityFeasibleSlow(const Core::Grid<uint32_t>& CityQualityRankings,
                                                        uint32_t RectWidth, uint32_t RectHeight)
    {
+      // All rects have median > 0.
+      // Low is the value where all rectangles have median > it.
       size_t Low{0};
+
+      // All rects have median < the number of cities
+      // High is the value where all rectangles have median <= it.
       size_t High{CityQualityRankings.GetWidth() * CityQualityRankings.GetHeight()};
-      // This is a case where we framed the problem as High defining the reasonable range and Low defining the unreasonable range
-      // Our guess is, are all the rectangles median's <= Mid? If so then the feasible.
-      // Thus the low end is unfeasible. Since median is surely not <= 0.
+
+      // Stop if somehow the median value all rectangles are <= is somehow bleeding into the median value all rectangles is > than.
       while(High - 1 > Low)
       {
+         // Mid is the test median
          size_t Mid{(Low + High) / 2};
 
          if(TestRectanglesFeasibleSlow(CityQualityRankings, RectWidth, RectHeight, Mid))
@@ -95,13 +100,17 @@ namespace LivingQuality
    size_t FindMinimumMedianRectangleInCityFeasible(const Core::Grid<uint32_t>& CityQualityRankings, uint32_t RectWidth,
                                                    uint32_t RectHeight)
    {
+      // All rects have median > 0.
+      // Low is the value where all rectangles have median > it.
       size_t Low{0};
+      // All rects have median < the number of cities
+      // High is the value where all rectangles have median <= it.
       size_t High{CityQualityRankings.GetWidth() * CityQualityRankings.GetHeight()};
-      // This is a case where we framed the problem as High defining the reasonable range and Low defining the unreasonable range
-      // Our guess is, are all the rectangles median's <= Mid? If so then the feasible.
-      // Thus the low end is unfeasible. Since median is surely not <= 0.
+
+      // Stop if somehow the median value all rectangles are <= is somehow bleeding into the median value all rectangles is > than.
       while(High - 1 > Low)
       {
+         // Mid is the test median
          size_t Mid{(Low + High) / 2};
 
          if(TestRectanglesFeasibleRangeSumQuery(CityQualityRankings, RectWidth, RectHeight, Mid))

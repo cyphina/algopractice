@@ -5,9 +5,9 @@
 namespace
 {
    uint32_t CountNumFlavoredPiecesInSlab(const Yokan::FlavorIndices& FlavorIndices, uint32_t TargetFlavor,
-                                         std::size_t LeftSlabInclusiveIndex, std::size_t RightSlabInclusiveIndex)
+                                         std::size_t LeftSlabInclusiveIndex, std::size_t RightSlabExclusiveIndex)
    {
-      if(RightSlabInclusiveIndex < LeftSlabInclusiveIndex || TargetFlavor >= FlavorIndices.Data.size())
+      if(RightSlabExclusiveIndex < LeftSlabInclusiveIndex || TargetFlavor >= FlavorIndices.Data.size())
       {
          return 0;
       }
@@ -43,7 +43,7 @@ namespace
 
       const auto ElementsLargerThanLeftStartIndex{Low};
 
-      // Everything to the left of Right is < RightSlabInclusiveIndex so offset it.
+      // Everything to the left of Right is < RightSlabExclusiveIndex so offset it.
 
       Low  = 0;
       High = TargetedFlavorIndices.size();
@@ -51,7 +51,7 @@ namespace
       while(Low < High)
       {
          std::size_t Mid{(Low + High) / 2};
-         if(TargetedFlavorIndices[Mid] < RightSlabInclusiveIndex + 1)
+         if(TargetedFlavorIndices[Mid] < RightSlabExclusiveIndex)
          {
             Low = Mid + 1;
          }
@@ -89,7 +89,6 @@ namespace Yokan
                                          std::size_t LeftSlabInclusiveIndex, std::size_t RightSlabExclusiveIndex)
 
    {
-      RightSlabExclusiveIndex = RightSlabExclusiveIndex - 1;
       if(LeftSlabInclusiveIndex > RightSlabExclusiveIndex || RightSlabExclusiveIndex > PieceFlavors.size())
       {
          return {};
@@ -103,17 +102,18 @@ namespace Yokan
       std::mt19937       Engine{Seeder()};
       // Notice that these values are inclusive
 
-      std::uniform_int_distribution Distribution{LeftSlabInclusiveIndex, RightSlabExclusiveIndex};
+      std::uniform_int_distribution Distribution{LeftSlabInclusiveIndex, RightSlabExclusiveIndex - 1};
 
-      std::size_t    CurrentGuessIndex{};
-      std::size_t    PieceSize{RightSlabExclusiveIndex - LeftSlabInclusiveIndex};
-      const uint32_t FlavorCountThreshold{static_cast<uint32_t>(std::ceil(PieceSize / 3.0))};
+      std::size_t CurrentGuessIndex{};
+      std::size_t PieceSize{RightSlabExclusiveIndex - LeftSlabInclusiveIndex};
+      const float FlavorCountThreshold{PieceSize / 3.0f};
 
       std::optional<uint32_t> FirstFlavorType;
       for(; CurrentGuessIndex < NUM_GUESSES; ++CurrentGuessIndex)
       {
          const auto GuessIndex{Distribution(Engine)};
          const auto FlavorType{PieceFlavors[GuessIndex] - 1};
+         // Since right is exclusive we should not include indices right on it.
          const auto GuessCount{CountNumFlavoredPiecesInSlab(FlavorIndexLookup, FlavorType, LeftSlabInclusiveIndex,
                                                             RightSlabExclusiveIndex)};
 

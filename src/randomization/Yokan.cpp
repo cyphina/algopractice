@@ -27,6 +27,9 @@ namespace
 
       // We have to use a binary search to a boundary position instead of our typical binary search find something.
       // Everything to the left of Low is < LeftSlabInclusiveIndex.
+      // Everything at High and to the right is >= LeftSlabInclusiveIndex.
+      // If Low >= High then we would have a scenario where this invariant is broken so stop at Low < High.
+      // This is just std::lower_bound.
 
       while(Low < High)
       {

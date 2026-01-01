@@ -1,6 +1,8 @@
 #pragma once
 
+#include <ranges>
 #include <span>
+#include <string_view>
 
 namespace StringUtils
 {
@@ -13,4 +15,11 @@ namespace StringUtils
    // Notice how you must null terminate manually, and you're responsible for freeing memory later.
    // And you can't append - you have to copy bytes somewhere.
    void Xor_Swap_LowLevel(unsigned char* A, size_t A_Len, unsigned char* B, size_t B_Len);
+
+   inline auto Split(std::string_view Data, char Delimiter)
+   {
+      return Data | std::views::split(Delimiter);
+   }
+
+   std::string_view Trim(std::string_view Data);
 }

@@ -45,6 +45,11 @@ TEST_CASE("CapsAndBottles", "[randomization]")
             CHECK(it->second == 3);
             break;
          }
+         default:
+         {
+            FAIL();
+            break;
+         }
       }
    }
 }

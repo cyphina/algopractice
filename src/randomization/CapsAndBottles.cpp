@@ -77,9 +77,9 @@ namespace CapsAndBottles
             return {};
          }
 
-         std::vector<uint32_t> CapIndices(std::from_range, std::views::iota(0u, CapSizes.size()));
-         std::vector<uint32_t> BottleIndices{std::from_range, std::views::iota(0u, BottleSizes.size())};
-         CapToBottleIndices    Results;
+         std::vector        CapIndices(std::from_range, std::views::iota(0u, CapSizes.size()));
+         std::vector        BottleIndices{std::from_range, std::views::iota(0u, BottleSizes.size())};
+         CapToBottleIndices Results;
 
          MatchCapsAndBottlesImpl(CapIndices, BottleIndices, CapSizes, BottleSizes, Results);
 

@@ -175,6 +175,33 @@ void TestEverythingLambda()
    std::println("Everything Lambda Result - {}", Result);
 }
 
+void TestRecursiveLambda()
+{
+   auto fibonacci = [](this auto& self, int n)
+   {
+      if(n < 2)
+      {
+         return n;
+      }
+      return self(n - 1) + self(n - 2);
+   };
+
+   // Pre C++23
+   const auto fibonacciPre = [](int n) noexcept
+   {
+      const auto f_impl = [](int n, const auto& impl) noexcept -> int
+      {
+         return n < 2 ? n : impl(n - 1, impl) + impl(n - 2, impl);
+      };
+
+      return f_impl(n, f_impl);
+   };
+
+   // 0 1 1 2 3 5
+   std::println("{}", fibonacci(5));
+   std::println("{}", fibonacciPre(5));
+}
+
 int main()
 {
    TestMatches();
@@ -183,4 +210,5 @@ int main()
    STLFunctorExample();
    MoveOnlyFunctionExample();
    TestEverythingLambda();
+   TestRecursiveLambda();
 }

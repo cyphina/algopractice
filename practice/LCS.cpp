@@ -44,7 +44,7 @@ int longestCommonSubsequenceImpl(const std::string& s1, const std::string& s2, c
    return LCSLength;
 }
 
-int longestCommonSubsequence(const std::string& s1, const std::string& s2)
+int LongestCommonSubsequence(const std::string& s1, const std::string& s2)
 {
    std::vector Memo(s1.size() + 1, std::vector<std::optional<int>>(s2.size() + 1));
    return longestCommonSubsequenceImpl(s1, s2, s1.size(), s2.size(), Memo);
@@ -52,7 +52,7 @@ int longestCommonSubsequence(const std::string& s1, const std::string& s2)
 
 int main()
 {
-   std::cout << longestCommonSubsequence("seaweed", "seed") << "\n";
-   std::cout << longestCommonSubsequence("sad", "asd") << "\n";
-   std::cout << longestCommonSubsequence("a", "a") << "\n";
+   std::cout << LongestCommonSubsequence("seaweed", "seed") << "\n";
+   std::cout << LongestCommonSubsequence("sad", "asd") << "\n";
+   std::cout << LongestCommonSubsequence("a", "a") << "\n";
 }

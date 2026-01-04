@@ -9,6 +9,17 @@ namespace
       float Z{};
    };
 
+   void TestVariableSizes()
+   {
+      // Platform dependent but just to get a ist
+
+      std::println("int - {}", sizeof(int));
+      std::println("short - {}", sizeof(short));
+      std::println("long - {}", sizeof(long));
+      std::println("long long - {}", sizeof(long long));
+      std::println("unsigned long long - {}", sizeof(unsigned long long));
+   }
+
    void TestStructuredBindings()
    {
       Vector Test{1, 2, 3};
@@ -28,4 +39,5 @@ namespace
 int main()
 {
    TestStructuredBindings();
+   TestVariableSizes();
 }

@@ -6,6 +6,11 @@
 #include <utility>
 #include <vector>
 
+/**
+ * Longest balanced subarray means number of 0s and 1s are equal.
+ * Trick to this problem is to trya bunch of examples and track the last time we hit a prefix sum value twice so we need
+ * to record when we last hit it.
+ */
 std::pair<int, int> FindLongestBalancedSubarray(std::vector<int>& A)
 {
    std::ranges::transform(A, A.begin(),

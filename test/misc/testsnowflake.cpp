@@ -4,7 +4,7 @@
 
 TEST_CASE("Test Snowflake", "[snowflake]")
 {
-   REQUIRE(Snowflake::isIdentical(std::array{1, 2, 3, 4, 5}, std::array{2, 3, 4, 5, 1}));
-   REQUIRE(Snowflake::isIdentical(std::array{1, 2, 3, 4, 5}, std::array{2, 6, 4, 5, 1}) == false);
-   REQUIRE(Snowflake::isIdentical(std::array{1, 2, 3, 4, 5}, std::array{3, 4, 5, 1, 2}));
+   REQUIRE(Snowflake::IsIdentical(std::array{1, 2, 3, 4, 5}, std::array{2, 3, 4, 5, 1}));
+   REQUIRE(Snowflake::IsIdentical(std::array{1, 2, 3, 4, 5}, std::array{2, 6, 4, 5, 1}) == false);
+   REQUIRE(Snowflake::IsIdentical(std::array{1, 2, 3, 4, 5}, std::array{3, 4, 5, 1, 2}));
 }

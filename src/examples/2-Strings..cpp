@@ -31,6 +31,7 @@ void TestSplitString()
 {
    std::string Test{"W E E E E !"};
    auto        SplittedTest{StringUtils::Split(Test, ' ')};
+
    std::println("Split C++20 - {}", SplittedTest);
 }
 
@@ -38,6 +39,7 @@ void TestTrimString()
 {
    std::string Test{"   WEEEE!  "};
    auto        TrimTest{StringUtils::Trim(Test)};
+
    std::println("Trim C++20 - {} {}", Test, TrimTest);
 }
 

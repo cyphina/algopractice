@@ -4,6 +4,8 @@
 #include <utility>
 #include <vector>
 
+// Given an array, count how many pairs satisfy `A[i] + A[j] <= K`, where `i<j`.
+
 size_t CountUniquePairs(std::vector<int>& A, int K)
 {
    if(A.size() < 2)
@@ -34,6 +36,34 @@ size_t CountUniquePairs(std::vector<int>& A, int K)
    }
 
    return UniquePairCount;
+}
+
+// Better implementation.
+int countAffordablePairs(std::vector<int> prices, int budget)
+{
+   if(prices.size() < 2)
+   {
+      return 0;
+   }
+
+   std::size_t start{0};
+   std::size_t end{prices.size() - 1};
+   int         NumPairs{};
+
+   while(start < end)
+   {
+      if(prices[start] + prices[end] <= budget)
+      {
+         NumPairs += end - start;
+         ++start;
+      }
+      else
+      {
+         --end;
+      }
+   }
+
+   return NumPairs;
 }
 
 int main()

@@ -1,6 +1,8 @@
 ﻿#include <format>
 #include <iostream>
+#include <locale>
 #include <print>
+#include <sstream>
 
 namespace
 {
@@ -38,10 +40,44 @@ namespace
 
       std::println("Escape Sequences - {} {}, {}, {}", s1, s2, s3, s4);
    }
+
+   void Print()
+   {
+      std::stringstream Stream;
+      Stream << 32767;
+      std::println("{}", Stream.str());
+   }
+
+   void TestLocale()
+   {
+      Print();
+      std::locale::global(std::locale{"en-US"});
+      Print();
+   }
+
+   void TestChangeLocaleForStream()
+   {
+      // Use the environment locale
+      std::cout.imbue(std::locale{""});
+      std::cout << "User's Locale: " << 32767 << std::endl;
+      // Change Back
+      std::cout.imbue(std::locale::classic());
+   }
+
+   void TestGlobalLocaleFormatSpecifier()
+   {
+      std::println("println() using classic locale: {}", 32767);
+      std::println("println() using global locale: {:L}", 32767);
+      // Specified locale
+      std::cout << std::format(std::locale{"en-US"}, "format() with en-US locale: {:L}", 32767);
+   }
 }
 
 int main()
 {
    TestEncodedStringLiterals();
    TestEscapeSequences();
+   TestLocale();
+   TestChangeLocaleForStream();
+   TestGlobalLocaleFormatSpecifier();
 }

@@ -2,6 +2,7 @@
 #include <algorithm>
 #include <format>
 #include <iostream>
+#include <unordered_map>
 #include <vector>
 
 namespace
@@ -45,6 +46,30 @@ namespace
       return false;
    }
 
+}
+
+// Solution using a hash table
+std::vector<int> findTaskPairForSlot(std::vector<int> taskDurations, int slotLength)
+{
+   std::unordered_map<int, int> DurationToIndex;
+   std::size_t                  Index{};
+
+   for(const auto& Duration : taskDurations)
+   {
+      if(const auto SeenValue{DurationToIndex.find(slotLength - Duration)}; SeenValue != DurationToIndex.end())
+      {
+         return {SeenValue->second, static_cast<int>(Index)};
+      }
+      else
+      {
+         // Used this over emplace. They hard coded an answer that probably depends on the fact this overwrites
+         // while emplace doens't.
+         DurationToIndex[Duration] = Index;
+         // DurationToIndex.emplace(Duration,Index);
+         ++Index;
+      }
+   }
+   return {-1, -1};
 }
 
 int main()

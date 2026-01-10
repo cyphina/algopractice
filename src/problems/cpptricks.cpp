@@ -10,7 +10,7 @@
 #include <ranges>
 #include <source_location>
 #include <vector>
-#include "core/TestUtils.h"
+#include "core/DebugUtils.h"
 
 void CleanupVectorMemory(std::vector<int>& V)
 {
@@ -73,7 +73,7 @@ void InsertMapAndPrint()
 {
    using namespace std::literals;
 
-   std::map<TestUtils::TestCopyVsAssign, int> DataMap{{"wee"sv, 2}, {"pee"sv, 3}, {"dee"sv, 5}};
+   std::map<Test::TestCopyVsAssign, int> DataMap{{"wee"sv, 2}, {"pee"sv, 3}, {"dee"sv, 5}};
    if(auto Ret{DataMap.insert({"wee"sv, 33})}; Ret.second)
    {
       std::println("Insert {} succeeded", Ret.first->second);
@@ -98,7 +98,7 @@ void InsertMapAndPrint()
 
    // Copying!!!
    // ReSharper disable once CppRangeBasedForIncompatibleReference
-   for(const std::pair<TestUtils::TestCopyVsAssign, int>& elem : DataMap)
+   for(const std::pair<Test::TestCopyVsAssign, int>& elem : DataMap)
    {
       std::println("{} {}", elem.first.data, elem.second);
    }

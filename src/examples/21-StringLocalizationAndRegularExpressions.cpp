@@ -15,14 +15,17 @@ namespace
    {
       const auto s1{"\262"};
       const auto s2{u8"\262"};
+      // wchar_t literal
       const auto s3{L"\262"};
+      // Since C++23 you can store this utf-8 in const char[] whicih is supported by format and print
       const char s4[]{u8"こんに"};
 
       // Can't mix and match
       std::println("{}", s1);
       std::wcout << std::format(L"{}", s3) << std::endl;
 
-      // Use char_x types for APIs to narrow down what encoding we have.
+      // Use char_x types for APIs to narrow down what encoding we have. The STL doesn't let you use too many encodings except for perhaps
+      // wchar_t and utf-8 stored in const char[].
       DoSomething(s2);
       std::println("{}", s4);
    }
@@ -69,7 +72,14 @@ namespace
       std::println("println() using classic locale: {}", 32767);
       std::println("println() using global locale: {:L}", 32767);
       // Specified locale
-      std::cout << std::format(std::locale{"en-US"}, "format() with en-US locale: {:L}", 32767);
+      std::cout << std::format(std::locale{"en-US"}, "format() with en-US locale: {:L}", 32767) << std::endl;
+   }
+
+   void TestCharacterClassificationAndConversion()
+   {
+      std::println("É {}", isupper(L'É', std::locale{"fr-FR"}));                          // True
+      std::println("é {}", isupper(L'é', std::locale{"fr-FR"}));                          // False
+      std::wcout << std::format(L"{}", toupper(L'é', std::locale{"fr-FR"})) << std::endl; // Prints É
    }
 }
 
@@ -80,4 +90,5 @@ int main()
    TestLocale();
    TestChangeLocaleForStream();
    TestGlobalLocaleFormatSpecifier();
+   TestCharacterClassificationAndConversion();
 }

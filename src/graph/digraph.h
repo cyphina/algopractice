@@ -26,14 +26,20 @@ namespace digraph
       adjacency_list_type m_adjacentNodeIndices;
    };
 
-   /** Directed graph that only allows unique elements */
+   /** 
+    * Directed graph that only allows unique elements 
+    * It's an example of what you need to do to provide a container that works with STL algorithms.
+    */
    template <typename T>
    class directed_graph
    {
     public:
+      // Needs special member functions but we use rule of 0.
+
       template <typename DirectedGraph>
       class const_directed_graph_iterator_impl;
 
+      // -- STL wants these aliases --
       using value_type      = T;
       using reference       = value_type&;
       using const_reference = const value_type&;
@@ -43,7 +49,11 @@ namespace digraph
       using const_iterator  = const_directed_graph_iterator_impl<directed_graph>;
 
       // Value should not be in the graph yet.
-      bool insert(T node_value);
+      std::pair<iterator, bool> insert(T node_value);
+
+      template <std::input_iterator Iter>
+      void insert(Iter first, Iter last);
+
       // Returns true if the give node value was erased, false otherwise.
       bool erase(const T& node_value);
       // Returns true if edge was successfully created, false otherwise.
@@ -55,14 +65,15 @@ namespace digraph
       // No bounds checking
       const_reference operator[](std::size_t Index) const;
 
+      // -- STL container should provide these --
       // Same nodes, same structure. Order nodes added in does not matter.
       bool                      operator==(const directed_graph& rhs) const;
       void                      swap(directed_graph& other_graph) noexcept;
       [[nodiscard]] std::size_t size() const noexcept { return m_nodes.size(); }
       [[nodiscard]] std::size_t max_size() const noexcept { return m_nodes.max_size(); }
       [[nodiscard]] bool        empty() const noexcept { return m_nodes.empty(); }
-      [[nodiscard]] std::set<T> get_adjacent_nodes_values(const T& node_value) const;
 
+      // -- STL container should provide these --
       // Even though these are type aliases for the same kind of iterator and we could get away with just the const overloads in terms of functionality, the STL
       // says we need nonconst versions too.
       iterator       begin() noexcept { return iterator{std::begin(m_nodes)}; }
@@ -111,7 +122,8 @@ namespace digraph
       typename node_container_type::iterator       find_node(const T& node_value);
       typename node_container_type::const_iterator find_node(const T& node_value) const;
 
-      std::size_t get_index_of_node(typename node_container_type::const_iterator node) const noexcept;
+      std::size_t               get_index_of_node(typename node_container_type::const_iterator node) const noexcept;
+      [[nodiscard]] std::set<T> get_adjacent_nodes_values(const T& node_value) const;
 
       void remove_all_links_to(typename node_container_type::const_iterator node_iter);
 
@@ -138,16 +150,23 @@ namespace digraph
    }
 
    template <typename T>
-   bool directed_graph<T>::insert(T node_value)
+   std::pair<typename directed_graph<T>::iterator, bool> directed_graph<T>::insert(T node_value)
    {
       auto iter{find_node(node_value)};
       if(iter != std::end(m_nodes))
       {
-         return false;
+         return {iterator{iter}, false};
       }
 
       m_nodes.emplace_back(this, std::move(node_value));
-      return true;
+      return {iterator{std::prev(std::end(m_nodes))}, true};
+   }
+
+   template <typename T>
+   template <std::input_iterator Iter>
+   void directed_graph<T>::insert(Iter first, Iter last)
+   {
+      std::copy(first, last, std::insert_iterator{*this, end()});
    }
 
    template <typename T>

@@ -39,7 +39,7 @@ namespace
       const char s2[]{u8"NO SUPERSCRIPT SUPPORT"};
 #endif
       const char s3[]{u8"\x236A"};
-      const char s4[]{u8"\o{236A}"};
+      const char s4[]{u8"\o{236}"};
 
       std::println("Escape Sequences - {} {}, {}, {}", s1, s2, s3, s4);
    }
@@ -77,9 +77,58 @@ namespace
 
    void TestCharacterClassificationAndConversion()
    {
-      std::println("É {}", isupper(L'É', std::locale{"fr-FR"}));                          // True
-      std::println("é {}", isupper(L'é', std::locale{"fr-FR"}));                          // False
-      std::wcout << std::format(L"{}", toupper(L'é', std::locale{"fr-FR"})) << std::endl; // Prints É
+      std::println("É {}", isupper(L'É', std::locale{"fr-FR"}));                     // True
+      std::println("é {}", isupper(L'é', std::locale{"fr-FR"}));                     // False
+      std::wcout << std::format(L"{}", toupper(L'é', std::locale{"fr-FR"})) << '\n'; // Prints É
+   }
+
+   void TestFacets()
+   {
+      std::locale LocUSEng{"en-US"};
+      std::locale LocBritEng{"en-GB"};
+
+      std::wstring Dollars{std::use_facet<std::moneypunct<wchar_t>>(LocUSEng).curr_symbol()};
+      std::wstring Pounds{std::use_facet<std::moneypunct<wchar_t>>(LocBritEng).curr_symbol()};
+
+      std::wcout << std::format(L"En Currency {}. GB Currency {}.", Dollars, Pounds) << "\n";
+      std::wcout << std::format(L"En Currency {}. GB Currency {}.", Dollars, Pounds) << "\n";
+
+      // Here's an examlpe of feature we can probably forget since it's not really used much but it's there.
+
+      std::string                    Source{"March 25 2024"};
+      std::istringstream             Str{Source.data()};
+      std::ios_base::iostate         Err{std::ios_base::goodbit};
+      std::tm                        Time;
+      std::istreambuf_iterator<char> Last{};
+
+      const auto TimeGetEn{std::use_facet<std::time_get<char>>(LocUSEng).get_monthname({Str}, {}, Str, Err, &Time)};
+
+      if(Str && !(Err & std::ios_base::failbit))
+      {
+         std::println("En {}.", Time.tm_mon);
+
+         if(TimeGetEn != Last)
+         {
+            std::println("Remaining Content");
+            std::copy(TimeGetEn, Last, std::ostreambuf_iterator<char>(std::cout));
+            std::cout << "\n";
+         }
+      }
+
+      // Reset the stream
+      Str.seekg(0);
+      const auto TimeGetGB{std::use_facet<std::time_get<char>>(LocBritEng).get_monthname({Str}, {}, Str, Err, &Time)};
+      if(Str && !(Err & std::ios_base::failbit))
+      {
+         std::println("GB {}.", Time.tm_mon);
+
+         if(TimeGetGB != Last)
+         {
+            std::println("Remaining Content");
+            std::copy(TimeGetGB, Last, std::ostreambuf_iterator<char>(std::cout));
+            std::cout << "\n";
+         }
+      }
    }
 }
 
@@ -91,4 +140,5 @@ int main()
    TestChangeLocaleForStream();
    TestGlobalLocaleFormatSpecifier();
    TestCharacterClassificationAndConversion();
+   TestFacets();
 }

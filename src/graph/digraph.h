@@ -1,7 +1,12 @@
 #pragma once
 
 #include <algorithm>
-#include <unordered_set>
+#include <ostream>
+#include <print>
+#include <ranges>
+#include <set>
+#include <sstream>
+#include <vector>
 
 namespace digraph
 {
@@ -17,8 +22,9 @@ namespace digraph
       explicit graph_node(directed_graph<T>* graph, T t) : m_graph{graph}, m_data{std::move(t)} {}
       [[nodiscard]] const T&    value() const noexcept { return m_data; }
       [[nodiscard]] auto&       get_adjacent_nodes_indices() { return m_adjacentNodeIndices; }
-      [[nodiscard]] const auto& get_adjacent_indices() { return m_adjacentNodeIndices; }
-      void                      remove_node_index(std::size_t node_index);
+      [[nodiscard]] const auto& get_adjacent_nodes_indices() const { return m_adjacentNodeIndices; }
+
+      void remove_node_index(std::size_t node_index);
 
     private:
       directed_graph<T>*  m_graph;
@@ -54,6 +60,9 @@ namespace digraph
       template <std::input_iterator Iter>
       void insert(Iter first, Iter last);
 
+      template <std::ranges::input_range Range>
+      void insert_range(Range&& range);
+
       // Returns true if the give node value was erased, false otherwise.
       bool erase(const T& node_value);
       // Returns true if edge was successfully created, false otherwise.
@@ -64,6 +73,8 @@ namespace digraph
       void clear() noexcept;
       // No bounds checking
       const_reference operator[](std::size_t Index) const;
+
+      [[nodiscard]] std::set<T> get_adjacent_nodes_values(const T& node_value) const;
 
       // -- STL container should provide these --
       // Same nodes, same structure. Order nodes added in does not matter.
@@ -104,7 +115,8 @@ namespace digraph
          explicit const_directed_graph_iterator_impl(node_container_iterator it) : m_nodeIterator{it} {}
 
          reference operator*() const;
-         pointer   operator->() const;
+         // Return a pointer to the actual element so the compiler can apply -> to it to access the actual desired field
+         pointer operator->() const;
 
          const_directed_graph_iterator_impl& operator++();
          const_directed_graph_iterator_impl& operator++(int);
@@ -122,13 +134,68 @@ namespace digraph
       typename node_container_type::iterator       find_node(const T& node_value);
       typename node_container_type::const_iterator find_node(const T& node_value) const;
 
-      std::size_t               get_index_of_node(typename node_container_type::const_iterator node) const noexcept;
-      [[nodiscard]] std::set<T> get_adjacent_nodes_values(const T& node_value) const;
+      std::size_t get_index_of_node(typename node_container_type::const_iterator node) const noexcept;
+
+      // Given an adjacency list for a node gives us a set of all the values of nodes pointed to by those edges
+      [[nodiscard]] std::set<T>
+      get_adjacent_nodes_values(const typename graph_node<T>::adjacency_list_type& indices) const;
 
       void remove_all_links_to(typename node_container_type::const_iterator node_iter);
 
       node_container_type m_nodes;
    };
+
+   template <typename T>
+   std::string to_dot(const directed_graph<T>& graph, std::string_view graph_name)
+   {
+      std::ostringstream output;
+      std::println(output, "digraph {} {{", graph_name);
+      for(std::size_t index{}; index < graph.size(); ++index)
+      {
+         const auto& node_value{graph[index]};
+         const auto  adjacent_values{graph.get_adjacent_nodes_values(node_value)};
+         if(adjacent_values.empty())
+         {
+            std::println(output, "{}", node_value);
+         }
+         else
+         {
+            for(auto&& neighbor : adjacent_values)
+            {
+               std::println(output, "{} -> {}", node_value, neighbor);
+            }
+         }
+      }
+
+      std::println(output, "}}");
+      // Lets us use a && return type qualifier overload
+      return std::move(output).str();
+   }
+
+   template <typename T>
+   std::set<T>
+   directed_graph<T>::get_adjacent_nodes_values(const typename graph_node<T>::adjacency_list_type& indices) const
+   {
+      std::set<T> values;
+      for(auto&& index : indices)
+      {
+         values.insert(m_nodes[index].value());
+      }
+      return values;
+   }
+
+   template <typename T>
+   std::set<T> directed_graph<T>::get_adjacent_nodes_values(const T& node_value) const
+   {
+      const auto iter{find_node(node_value)};
+
+      if(iter != std::end(m_nodes))
+      {
+         return get_adjacent_nodes_values(iter->get_adjacent_nodes_indices());
+      }
+
+      return {};
+   }
 
    template <typename T>
    void graph_node<T>::remove_node_index(std::size_t node_index)
@@ -170,6 +237,13 @@ namespace digraph
    }
 
    template <typename T>
+   template <std::ranges::input_range Range>
+   void directed_graph<T>::insert_range(Range&& range)
+   {
+      insert(std::ranges::begin(range), std::ranges::end(range));
+   }
+
+   template <typename T>
    bool directed_graph<T>::erase(const T& node_value)
    {
       auto iter{find_node(node_value)};
@@ -186,8 +260,8 @@ namespace digraph
    template <typename T>
    bool directed_graph<T>::insert_edge(const T& from_node_value, const T& to_node_value)
    {
-      auto& from{find_node(from_node_value)};
-      auto& to{find_node(to_node_value)};
+      const auto from{find_node(from_node_value)};
+      const auto to{find_node(to_node_value)};
 
       if(from == std::end(m_nodes) || to == std::end(m_nodes))
       {
@@ -200,12 +274,75 @@ namespace digraph
    }
 
    template <typename T>
+   bool directed_graph<T>::erase_edge(const T& from_node_value, const T& to_node_value)
+   {
+      const auto from{find_node(from_node_value)};
+      const auto to{find_node(to_node_value)};
+
+      if(from == std::end(m_nodes) || to == std::end(m_nodes))
+      {
+         return false;
+      }
+
+      const std::size_t to_index{get_index_of_node(to)};
+      from->get_adjacent_nodes_indices().erase(to_index);
+      return true;
+   }
+
+   template <typename T>
+   void directed_graph<T>::clear() noexcept
+   {
+      m_nodes.clear();
+   }
+
+   template <typename T>
+   typename directed_graph<T>::const_reference directed_graph<T>::operator[](std::size_t Index) const
+   {
+      return m_nodes[Index].value();
+   }
+
+   template <typename T>
+   void directed_graph<T>::swap(directed_graph& other_graph) noexcept
+   {
+      m_nodes.swap(other_graph.m_nodes);
+   }
+
+   template <typename T>
+   bool directed_graph<T>::operator==(const directed_graph& rhs) const
+   {
+      if(m_nodes.size() != rhs.m_nodes.size())
+      {
+         return false;
+      }
+
+      for(auto&& node : m_nodes)
+      {
+         const auto rhsNodeIter{rhs.find_node(node.value())};
+         if(rhsNodeIter == std::end(rhs.m_nodes))
+         {
+            return false;
+         }
+
+         // Values of the nodes connected to this one.
+         const auto adjacent_values_lhs{get_adjacent_nodes_values(node.get_adjacent_nodes_indices())};
+         // Values of the connected to that node in the other graph
+         const auto adjacent_values_rhs{rhs.get_adjacent_nodes_values(rhsNodeIter->get_adjacent_nodes_indices())};
+
+         if(adjacent_values_lhs != adjacent_values_rhs)
+         {
+            return false;
+         }
+      }
+
+      return true;
+   }
+
+   template <typename T>
    template <typename DirectedGraph>
    typename directed_graph<T>::const_directed_graph_iterator_impl<DirectedGraph>::reference
    directed_graph<T>::const_directed_graph_iterator_impl<DirectedGraph>::operator*() const
    {
-      // Return a pointer to the actal element so the compiler can aply8 -> to it to access the actual desired field
-      return &m_nodeIterator->value();
+      return m_nodeIterator->value();
    }
 
    template <typename T>
@@ -213,8 +350,7 @@ namespace digraph
    typename directed_graph<T>::const_directed_graph_iterator_impl<DirectedGraph>::pointer
    directed_graph<T>::const_directed_graph_iterator_impl<DirectedGraph>::operator->() const
    {
-      // Return a reference to the actual element.
-      return m_nodeIterator->value();
+      return &m_nodeIterator->value();
    }
 
    template <typename T>

@@ -1,5 +1,7 @@
+#include <ostream>
 #include <print>
 #include <ranges>
+#include <sstream>
 #include <string>
 #include "core/StringUtils.h"
 
@@ -43,10 +45,19 @@ void TestTrimString()
    std::println("Trim C++20 - {} {}", Test, TrimTest);
 }
 
+void TestPrintToOstream()
+{
+   // Need to include <ostream>
+   std::ostringstream S;
+   std::println(S, "{}", "Wee");
+   std::println("{}", S.str());
+}
+
 int main()
 {
    TestStringLiterals();
    TestStringConstructors();
    TestSplitString();
    TestTrimString();
+   TestPrintToOstream();
 }

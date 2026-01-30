@@ -60,8 +60,14 @@ namespace digraph
       template <std::input_iterator Iter>
       void insert(Iter first, Iter last);
 
+      void insert(std::initializer_list<T> il);
+
       template <std::ranges::input_range Range>
       void insert_range(Range&& range);
+
+      // Clear then add new nodes.
+      template <std::input_iterator Iter>
+      void assign(Iter first, Iter last);
 
       // Returns true if the give node value was erased, false otherwise.
       bool erase(const T& node_value);
@@ -71,6 +77,7 @@ namespace digraph
       bool erase_edge(const T& from_node_value, const T& to_node_value);
       // Remove all nodes from the graph
       void clear() noexcept;
+
       // No bounds checking
       const_reference operator[](std::size_t Index) const;
 
@@ -237,6 +244,12 @@ namespace digraph
    }
 
    template <typename T>
+   void directed_graph<T>::insert(std::initializer_list<T> il)
+   {
+      insert(std::begin(il), std::end(il));
+   }
+
+   template <typename T>
    template <std::ranges::input_range Range>
    void directed_graph<T>::insert_range(Range&& range)
    {
@@ -293,6 +306,17 @@ namespace digraph
    void directed_graph<T>::clear() noexcept
    {
       m_nodes.clear();
+   }
+
+   template <typename T>
+   template <std::input_iterator Iter>
+   void directed_graph<T>::assign(Iter first, Iter last)
+   {
+      clear();
+      for(auto iter{first}; iter != last; ++iter)
+      {
+         insert(*iter);
+      }
    }
 
    template <typename T>
